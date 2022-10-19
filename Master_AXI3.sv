@@ -138,168 +138,168 @@ module AXI(
 	
 );
     //---------- you should put your design here ----------//
+/*
+    //--------------------------------------------------------------------------
+    //-----------------------FSM for M1 channel---------------------------------
+    //--------------------------------------------------------------------------
+    Master M1();  // call M1 module
 
-//--------------------------------------------------------------------------
-//-----------------------FSM for M1 channel---------------------------------
-//--------------------------------------------------------------------------
-Master M1();  // call M1 module
+    //AW channel states of M1
+    enum logic [1:0] { 
+        MWRITE_IDLE=2'b00,
+        MWRITE_START=2'b01,
+        MWRITE_WAIT=2'b10,
+        MWRITE_VALID=2'b11 } MAWRITEState, MAWRITENext_state; 
 
-//AW channel states of M1
-enum logic [1:0] { 
-    MWRITE_IDLE=2'b00,
-    MWRITE_START=2'b01,
-    MWRITE_WAIT=2'b10,
-    MWRITE_VALID=2'b11 } MAWRITEState, MAWRITENext_state; 
+    always_ff @(posedge clk or negedge rst) begin	
 
-always_ff @(posedge clk or negedge rst) begin	
+            if(!rst) begin
+                MAWRITEState <= MWRITE_IDLE;
+            end
 
+            else begin
+                MAWRITEState <= MAWRITENext_state;
+            end	
+    end
+
+    always_comb	 begin	
+        case(MAWRITEState)
+            MWRITE_IDLE:begin
+                M1.AWVALID = 0;
+                M1.AWBURST = 0;
+                M1.AWSIZE = 0;
+                M1.AWLEN = 0;
+                M1.AWADDR = 0;
+                M1.AWID = 0;
+                MAWRITENext_state = MWRITE_START;
+            end		
+                    
+            MWRITE_START:begin
+                if(AWADDR_M1 > 32'h0)  begin //start state 接收到 ADDR 則 assign 沒有則 回去IDEL等待 CPU Wrapper 的AWADDR assign
+                    M1.AWBURST = AWBURST_M1;
+                    M1.AWSIZE = AWSIZE_M1;
+                    M1.AWLEN = AWLEN_M1;
+                    M1.AWADDR = AWADDR_M1;
+                    M1.AWID = AWID_M1;
+                    M1.AWVALID = 1'b1;
+                    MAWRITENext_state = MWRITE_WAIT;	
+                end
+                    
+                else
+                    MAWRITENext_state = MWRITE_IDLE;
+            end
+                
+            MWRITE_WAIT:begin	
+                if (M1.AWREADY) //收到READY signal則進入VALID
+                    MAWRITENext_state = MWRITE_VALID;
+
+                else
+                    MAWRITENext_state = MWRITE_WAIT; //沒有則繼續等待
+            end
+        
+            MWRITE_VALID:begin
+                M1.AWVALID = 0; //清空VALID signal
+                if(M1.BREADY) // 收到完成 RESPONSE 回到IDEL 等待ADDR assign
+                    MAWRITENext_state = MWRITE_IDLE;
+
+                else // 等待RESPONSE
+                    MAWRITENext_state = MWRITE_VALID;
+            end
+        endcase
+    end
+
+
+    //W channel states of M1
+
+    // Master - Write data Channel  states
+    logic [4:0] Count, NextCount;
+    enum logic [2:0] {MWRITE_INIT=3'b000,
+        MWRITE_TRANSFER,
+        MWRITE_READY, 
+        MDWRITE_VALID,
+        MWRITE_ERROR} MWRITEState, MWRITENext_state;
+
+    always_ff @(posedge clk or negedge rst)begin  // asyncrhonus reset
         if(!rst) begin
-            MAWRITEState <= MWRITE_IDLE;
+            MWRITEState <= MWRITE_INIT;
+            Count <= 4'b0;
         end
 
         else begin
-            MAWRITEState <= MAWRITENext_state;
-        end	
-end
-
-always_comb	 begin	
-	case(MAWRITEState)
-        MWRITE_IDLE:begin
-            M1.AWVALID = 0;
-            M1.AWBURST = 0;
-            M1.AWSIZE = 0;
-            M1.AWLEN = 0;
-            M1.AWADDR = 0;
-            M1.AWID = 0;
-            MAWRITENext_state = MWRITE_START;
-        end		
-                
-        MWRITE_START:begin
-			if(AWADDR_M1 > 32'h0)  begin //start state 接收到 ADDR 則 assign 沒有則 回去IDEL等待 CPU Wrapper 的AWADDR assign
-			    M1.AWBURST = AWBURST_M1;
-			    M1.AWSIZE = AWSIZE_M1;
-			    M1.AWLEN = AWLEN_M1;
-			    M1.AWADDR = AWADDR_M1;
-			    M1.AWID = AWID_M1;
-			    M1.AWVALID = 1'b1;
-			    MAWRITENext_state = MWRITE_WAIT;	
-			end
-				 
-            else
-                MAWRITENext_state = MWRITE_IDLE;
+            MWRITEState <= MWRITENext_state;
+            Count <= NextCount;
         end
-             
-	    MWRITE_WAIT:begin	
-			if (M1.AWREADY) //收到READY signal則進入VALID
-				MAWRITENext_state = MWRITE_VALID;
+    end
 
-			else
-				MAWRITENext_state = MWRITE_WAIT; //沒有則繼續等待
-		end
-	
-	    MWRITE_VALID:begin
-		    M1.AWVALID = 0; //清空VALID signal
-		    if(M1.BREADY) // 收到完成 RESPONSE 回到IDEL 等待ADDR assign
-		    	MAWRITENext_state = MWRITE_IDLE;
+    always_comb begin
+        case(MWRITEState)
+        
+            MWRITE_INIT:begin
+                M1.WID = 0;
+                M1.WDATA = 0;
+                M1.WSTRB = 0;
+                M1.WLAST = 0;
+                M1.WVALID = 0;
+                NextCount = 0;
+                if(M1.AWREADY == 1) 
+                    MWRITENext_state = MWRITE_TRANSFER;	
+                else 
+                    MWRITENext_state = MWRITE_INIT;
+            end
 
-		    else // 等待RESPONSE
-		    	MAWRITENext_state = MWRITE_VALID;
-	    end
-	endcase
-end
+            MWRITE_TRANSFER:begin	
+                if(AWADDR_M1 > 32'hffff && AWADDR_M1 <= 32'h1_ffff && AWSIZE_M1 <3'b100) begin // allow read write
+                    M1.WID =  M1.AWID;
+                    M1.WVALID = 1;
+                    M1.WSTRB = WSTRB_M1;
+                    M1.WDATA = WDATA_M1;	
+                    NextCount = Count + 4'b1;
+                    MWRITENext_state = MWRITE_READY;
+                end
+                else begin
+                    NextCount = Count + 4'b1;
+                    MWRITENext_state = MWRITE_ERROR;
+                end
+            end
 
+            MWRITE_READY:begin
+                if(M1.WREADY) begin
+                    if(NextCount == (AWLEN_M1+1))  // use a counter to pull up  LAST signal
+                        M1.WLAST = 1'b1;
+                    else
+                        M1.WLAST = 1'b0;
+                        
+                    MWRITENext_state = MDWRITE_VALID;
+                end
 
-//W channel states of M1
-
-// Master - Write data Channel  states
-logic [4:0] Count, NextCount;
-enum logic [2:0] {MWRITE_INIT=3'b000,
-    MWRITE_TRANSFER,
-    MWRITE_READY, 
-    MDWRITE_VALID,
-    MWRITE_ERROR} MWRITEState, MWRITENext_state;
-
-always_ff @(posedge clk or negedge rst)begin  // asyncrhonus reset
-	if(!rst) begin
-		MWRITEState <= MWRITE_INIT;
-		Count <= 4'b0;
-	end
-
-	else begin
-		MWRITEState <= MWRITENext_state;
-		Count <= NextCount;
-	end
-end
-
-always_comb begin
-	case(MWRITEState)
-    
-		MWRITE_INIT:begin
-		    M1.WID = 0;
-			M1.WDATA = 0;
-			M1.WSTRB = 0;
-			M1.WLAST = 0;
-			M1.WVALID = 0;
-			NextCount = 0;
-            if(M1.AWREADY == 1) 
-                MWRITENext_state = MWRITE_TRANSFER;	
-            else 
-                MWRITENext_state = MWRITE_INIT;
-        end
-
-        MWRITE_TRANSFER:begin	
-            if(AWADDR_M1 > 32'hffff && AWADDR_M1 <= 32'h1_ffff && AWSIZE_M1 <3'b100) begin // allow read write
-                M1.WID =  M1.AWID;
-                M1.WVALID = 1;
-                M1.WSTRB = WSTRB_M1;
-                M1.WDATA = WDATA_M1;	
-                NextCount = Count + 4'b1;
-                MWRITENext_state = MWRITE_READY;
-			end
-			else begin
-				NextCount = Count + 4'b1;
-				MWRITENext_state = MWRITE_ERROR;
-			end
-		end
-
-	    MWRITE_READY:begin
-			if(M1.WREADY) begin
-			    if(NextCount == (AWLEN_M1+1))  // use a counter to pull up  LAST signal
+                else 
+                    MWRITENext_state = MWRITE_READY;	
+            end
+        
+            MDWRITE_VALID:begin
+                M1.WVALID = 0;
+                        
+                if(NextCount == AWLEN_M1+1) begin
+                    MWRITENext_state = MWRITE_INIT;	
+                    M1.WLAST=0;
+                end
+                else 
+                    MWRITENext_state = MWRITE_TRANSFER;
+            end
+        
+            MWRITE_ERROR:begin
+                if(NextCount == (AWLEN_M1+1)) begin
                     M1.WLAST = 1'b1;
-				else
+                    MWRITENext_state = MDWRITE_VALID;
+                end
+                else begin
                     M1.WLAST = 1'b0;
-                    
-				MWRITENext_state = MDWRITE_VALID;
-			end
-
-			else 
-                MWRITENext_state = MWRITE_READY;	
-		end
-	
-	    MDWRITE_VALID:begin
-            M1.WVALID = 0;
-                      
-			if(NextCount == AWLEN_M1+1) begin
-				MWRITENext_state = MWRITE_INIT;	
-				M1.WLAST=0;
-			end
-			else 
-                MWRITENext_state = MWRITE_TRANSFER;
-		end
-	  
-        MWRITE_ERROR:begin
-			if(NextCount == (AWLEN_M1+1)) begin
-				M1.WLAST = 1'b1;
-				MWRITENext_state = MDWRITE_VALID;
-			end
-			else begin
-				M1.WLAST = 1'b0;
-				MWRITENext_state = MWRITE_TRANSFER;
-			end
-		end	
-	endcase
-end
-
+                    MWRITENext_state = MWRITE_TRANSFER;
+                end
+            end	
+        endcase
+    end
+*/
 
 
     

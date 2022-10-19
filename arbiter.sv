@@ -6,6 +6,7 @@ module RR_ARBITER #(
     input logic clk,
     input logic rst,
     input logic[REQ_WIDTH - 1:0] req,
+    input logic LOCK,
     output logic[REQ_WIDTH - 1:0] grant
 );
 
@@ -49,19 +50,23 @@ module RR_ARBITER #(
 
         else begin
 
-            if(|req_masked) begin // which arbiter was be used ????
-                pointer_reg <= mask_higher_pri_reqs;
-            end
-
-            else begin
-                if(|req) begin
-                    pointer_reg <= unmask_higher_pri_reqs;
+            if (!LOCK) begin // if not a burst 持續change priority
+                if(|req_masked) begin // which arbiter was be used ????
+                    pointer_reg <= mask_higher_pri_reqs;
                 end
 
                 else begin
-                    pointer_reg <= pointer_reg;
+                    if(|req) begin
+                        pointer_reg <= unmask_higher_pri_reqs;
+                    end
+
+                    else begin
+                        pointer_reg <= pointer_reg;
+                    end
                 end
             end
+
+            else ; // if burst LOCK 住 contorl signal
 
         end
     end
