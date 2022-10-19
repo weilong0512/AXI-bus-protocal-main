@@ -5,7 +5,9 @@
 // Version:     1.0 
 //================================================
 `include "AXI_define.svh"
-`include "master.sv"
+`include "Ax_mux.sv"
+`include "Ax_decoder.sv"
+`include "W_mux.sv"
 
 module AXI(
 
@@ -138,172 +140,139 @@ module AXI(
 	
 );
     //---------- you should put your design here ----------//
-/*
-    //--------------------------------------------------------------------------
-    //-----------------------FSM for M1 channel---------------------------------
-    //--------------------------------------------------------------------------
-    Master M1();  // call M1 module
-
-    //AW channel states of M1
-    enum logic [1:0] { 
-        MWRITE_IDLE=2'b00,
-        MWRITE_START=2'b01,
-        MWRITE_WAIT=2'b10,
-        MWRITE_VALID=2'b11 } MAWRITEState, MAWRITENext_state; 
-
-    always_ff @(posedge clk or negedge rst) begin	
-
-            if(!rst) begin
-                MAWRITEState <= MWRITE_IDLE;
-            end
-
-            else begin
-                MAWRITEState <= MAWRITENext_state;
-            end	
-    end
-
-    always_comb	 begin	
-        case(MAWRITEState)
-            MWRITE_IDLE:begin
-                M1.AWVALID = 0;
-                M1.AWBURST = 0;
-                M1.AWSIZE = 0;
-                M1.AWLEN = 0;
-                M1.AWADDR = 0;
-                M1.AWID = 0;
-                MAWRITENext_state = MWRITE_START;
-            end		
-                    
-            MWRITE_START:begin
-                if(AWADDR_M1 > 32'h0)  begin //start state 接收到 ADDR 則 assign 沒有則 回去IDEL等待 CPU Wrapper 的AWADDR assign
-                    M1.AWBURST = AWBURST_M1;
-                    M1.AWSIZE = AWSIZE_M1;
-                    M1.AWLEN = AWLEN_M1;
-                    M1.AWADDR = AWADDR_M1;
-                    M1.AWID = AWID_M1;
-                    M1.AWVALID = 1'b1;
-                    MAWRITENext_state = MWRITE_WAIT;	
-                end
-                    
-                else
-                    MAWRITENext_state = MWRITE_IDLE;
-            end
-                
-            MWRITE_WAIT:begin	
-                if (M1.AWREADY) //收到READY signal則進入VALID
-                    MAWRITENext_state = MWRITE_VALID;
-
-                else
-                    MAWRITENext_state = MWRITE_WAIT; //沒有則繼續等待
-            end
-        
-            MWRITE_VALID:begin
-                M1.AWVALID = 0; //清空VALID signal
-                if(M1.BREADY) // 收到完成 RESPONSE 回到IDEL 等待ADDR assign
-                    MAWRITENext_state = MWRITE_IDLE;
-
-                else // 等待RESPONSE
-                    MAWRITENext_state = MWRITE_VALID;
-            end
-        endcase
-    end
 
 
-    //W channel states of M1
+// AW 
+	logic [`AXI_ID_BITS-1:0] AWID_mux2dec,
+	logic [`AXI_ADDR_BITS-1:0] AWADDR_mux2dec,
+	logic [`AXI_LEN_BITS-1:0] AWLEN_mux2dec,
+	logic [`AXI_SIZE_BITS-1:0] AWSIZE_mux2dec,
+	logic [1:0] AWBURST_mux2dec,
+	logic AWVALID_mux2dec,
+    Ax_mux AW_mux(
+        .AxID_M0(AWID_M0),
+        .AxADDR_M0(AWADDR_M0),
+        .AxLEN_M0(AWLEN_M0),
+        .AxSIZE_M0(AWSIZE_M0),
+        .AxBURST_M0(AWBURST_M0),
+        .AxVALID_M0(AWVALID_M0),
+        .AxID_M1(AWID_M1),
+        .AxADDR_M1(AWADDR_M1),
+        .AxLEN_M1(AWLEN_M1),
+        .AxSIZE_M1(AWSIZE_M1),
+        .AxBURST_M1(AWBURST_M1),
+        .AxVALID_M1(AWVALID_M1),
+        .gnt(), // from arbiter
+        .AxID(AWID_mux2dec), // to decoder
+        .AxADDR(AWADDR_mux2dec),
+        .AxLEN(AWLEN_mux2dec),
+        .AxSIZE(AWSIZE_mux2dec),
+        .AxBURST(AWBURST_mux2dec),
+        .AxVALID(AWVALID_mux2dec)
+    );
+    Ax_decoder AW_decoder(
+        .AxID(AWID_mux2dec), 
+        .AxADDR(AWADDR_mux2dec),
+        .AxLEN(AWLEN_mux2dec),
+        .AxSIZE(AWSIZE_mux2dec),
+        .AxBURST(AWBURST_mux2dec),
+        .AxVALID(AWVALID_mux2dec),
+        .AxID_S0(AWID_S0),
+        .AxADDR_S0(AWADDR_S0),
+        .AxLEN_S0(AWLEN_S0),
+        .AxSIZE_S0(AWSIZE_S0),
+        .AxBURST_S0(AWBURST_S0),
+        .AxVALID_S0(AWVALID_S0),
+        .AxID_S1(AWID_S1),
+        .AxADDR_S1(AWADDR_S1),
+        .AxLEN_S1(AWLEN_S1),
+        .AxSIZE_S1(AWSIZE_S1),
+        .AxBURST_S1(AWBURST_S1),
+        .AxVALID_S1(AWVALID_S1)
+    );
+//AR
+    logic [`AXI_ID_BITS-1:0] ARID_mux2dec,
+	logic [`AXI_ADDR_BITS-1:0] ARADDR_mux2dec,
+	logic [`AXI_LEN_BITS-1:0] ARLEN_mux2dec,
+	logic [`AXI_SIZE_BITS-1:0] ARSIZE_mux2dec,
+	logic [1:0] ARBURST_mux2dec,
+	logic ARVALID_mux2dec,
+    Ax_mux AR_mux(
+        .AxID_M0(ARID_M0),
+        .AxADDR_M0(ARADDR_M0),
+        .AxLEN_M0(ARLEN_M0),
+        .AxSIZE_M0(ARSIZE_M0),
+        .AxBURST_M0(ARBURST_M0),
+        .AxVALID_M0(ARVALID_M0),
+        .AxID_M1(ARID_M1),
+        .AxADDR_M1(ARADDR_M1),
+        .AxLEN_M1(ARLEN_M1),
+        .AxSIZE_M1(ARSIZE_M1),
+        .AxBURST_M1(ARBURST_M1),
+        .AxVALID_M1(ARVALID_M1),
+        .gnt(), // from arbiter
+        .AxID(ARID_mux2dec), // to decoder
+        .AxADDR(ARADDR_mux2dec),
+        .AxLEN(ARLEN_mux2dec),
+        .AxSIZE(ARSIZE_mux2dec),
+        .AxBURST(ARBURST_mux2dec),
+        .AxVALID(ARVALID_mux2dec)
+    );
+    Ax_decoder AR_decoder(
+        .AxID(ARID_mux2dec), 
+        .AxADDR(ARADDR_mux2dec),
+        .AxLEN(ARLEN_mux2dec),
+        .AxSIZE(ARSIZE_mux2dec),
+        .AxBURST(ARBURST_mux2dec),
+        .AxVALID(ARVALID_mux2dec),
+        .AxID_S0(ARID_S0),
+        .AxADDR_S0(ARADDR_S0),
+        .AxLEN_S0(ARLEN_S0),
+        .AxSIZE_S0(ARSIZE_S0),
+        .AxBURST_S0(ARBURST_S0),
+        .AxVALID_S0(ARVALID_S0),
+        .AxID_S1(ARID_S1),
+        .AxADDR_S1(ARADDR_S1),
+        .AxLEN_S1(ARLEN_S1),
+        .AxSIZE_S1(ARSIZE_S1),
+        .AxBURST_S1(ARBURST_S1),
+        .AxVALID_S1(ARVALID_S1)
+    );
 
-    // Master - Write data Channel  states
-    logic [4:0] Count, NextCount;
-    enum logic [2:0] {MWRITE_INIT=3'b000,
-        MWRITE_TRANSFER,
-        MWRITE_READY, 
-        MDWRITE_VALID,
-        MWRITE_ERROR} MWRITEState, MWRITENext_state;
+// Write Data
+    W_mux W_mux_S0(
+        .WDATA_M0(WDATA_M0),
+        .WSTRB_M0(WSTRB_M0),
+        .WLAST_M0(WLAST_M0),
+        .WVALID_M0(WVALID_M0),
+        .WDATA_M1(WDATA_M1),
+        .WSTRB_M1(WSTRB_M1),
+        .WLAST_M1(WLAST_M1),
+        .WVALID_M1(WVALID_M1),
+        .gnt(), // from arbiter
+        .WDATA(WDATA_S0),// to Slave 0
+        .WSTRB(WSTRB_S0),
+        .WLAST(WLAST_S0),
+        .WVALID(WVALID_S0)
+    );
 
-    always_ff @(posedge clk or negedge rst)begin  // asyncrhonus reset
-        if(!rst) begin
-            MWRITEState <= MWRITE_INIT;
-            Count <= 4'b0;
-        end
+    W_mux W_mux_S1(
+        .WDATA_M0(WDATA_M0),
+        .WSTRB_M0(WSTRB_M0),
+        .WLAST_M0(WLAST_M0),
+        .WVALID_M0(WVALID_M0),
+        .WDATA_M1(WDATA_M1),
+        .WSTRB_M1(WSTRB_M1),
+        .WLAST_M1(WLAST_M1),
+        .WVALID_M1(WVALID_M1),
+        .gnt(), // from arbiter
+        .WDATA(WDATA_S1),// to Slave 1
+        .WSTRB(WSTRB_S1),
+        .WLAST(WLAST_S1),
+        .WVALID(WVALID_S1)
+    );
 
-        else begin
-            MWRITEState <= MWRITENext_state;
-            Count <= NextCount;
-        end
-    end
-
-    always_comb begin
-        case(MWRITEState)
-        
-            MWRITE_INIT:begin
-                M1.WID = 0;
-                M1.WDATA = 0;
-                M1.WSTRB = 0;
-                M1.WLAST = 0;
-                M1.WVALID = 0;
-                NextCount = 0;
-                if(M1.AWREADY == 1) 
-                    MWRITENext_state = MWRITE_TRANSFER;	
-                else 
-                    MWRITENext_state = MWRITE_INIT;
-            end
-
-            MWRITE_TRANSFER:begin	
-                if(AWADDR_M1 > 32'hffff && AWADDR_M1 <= 32'h1_ffff && AWSIZE_M1 <3'b100) begin // allow read write
-                    M1.WID =  M1.AWID;
-                    M1.WVALID = 1;
-                    M1.WSTRB = WSTRB_M1;
-                    M1.WDATA = WDATA_M1;	
-                    NextCount = Count + 4'b1;
-                    MWRITENext_state = MWRITE_READY;
-                end
-                else begin
-                    NextCount = Count + 4'b1;
-                    MWRITENext_state = MWRITE_ERROR;
-                end
-            end
-
-            MWRITE_READY:begin
-                if(M1.WREADY) begin
-                    if(NextCount == (AWLEN_M1+1))  // use a counter to pull up  LAST signal
-                        M1.WLAST = 1'b1;
-                    else
-                        M1.WLAST = 1'b0;
-                        
-                    MWRITENext_state = MDWRITE_VALID;
-                end
-
-                else 
-                    MWRITENext_state = MWRITE_READY;	
-            end
-        
-            MDWRITE_VALID:begin
-                M1.WVALID = 0;
-                        
-                if(NextCount == AWLEN_M1+1) begin
-                    MWRITENext_state = MWRITE_INIT;	
-                    M1.WLAST=0;
-                end
-                else 
-                    MWRITENext_state = MWRITE_TRANSFER;
-            end
-        
-            MWRITE_ERROR:begin
-                if(NextCount == (AWLEN_M1+1)) begin
-                    M1.WLAST = 1'b1;
-                    MWRITENext_state = MDWRITE_VALID;
-                end
-                else begin
-                    M1.WLAST = 1'b0;
-                    MWRITENext_state = MWRITE_TRANSFER;
-                end
-            end	
-        endcase
-    end
-*/
-
-
-    
-	
+	 
 	
 	
 	
