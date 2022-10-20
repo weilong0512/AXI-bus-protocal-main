@@ -53,3 +53,6 @@ module AW_decoder(
         end
 
     end
+
+    
+endmodule

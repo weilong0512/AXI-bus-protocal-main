@@ -53,3 +53,5 @@ module AR_decoder(
         end
 
     end
+
+endmodule
