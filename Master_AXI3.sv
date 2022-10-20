@@ -6,7 +6,7 @@
 //================================================
 `include "AXI_define.svh"
 `include "Ax_mux.sv"
-`include "Ax_decoder.sv"
+`include "AW_decoder.sv"
 `include "W_mux.sv"
 
 module AXI(
@@ -170,25 +170,25 @@ module AXI(
         .AxBURST(AWBURST_mux2dec),
         .AxVALID(AWVALID_mux2dec)
     );
-    Ax_decoder AW_decoder(
-        .AxID(AWID_mux2dec), 
-        .AxADDR(AWADDR_mux2dec),
-        .AxLEN(AWLEN_mux2dec),
-        .AxSIZE(AWSIZE_mux2dec),
-        .AxBURST(AWBURST_mux2dec),
-        .AxVALID(AWVALID_mux2dec),
-        .AxID_S0(AWID_S0),
-        .AxADDR_S0(AWADDR_S0),
-        .AxLEN_S0(AWLEN_S0),
-        .AxSIZE_S0(AWSIZE_S0),
-        .AxBURST_S0(AWBURST_S0),
-        .AxVALID_S0(AWVALID_S0),
-        .AxID_S1(AWID_S1),
-        .AxADDR_S1(AWADDR_S1),
-        .AxLEN_S1(AWLEN_S1),
-        .AxSIZE_S1(AWSIZE_S1),
-        .AxBURST_S1(AWBURST_S1),
-        .AxVALID_S1(AWVALID_S1)
+    AW_decoder AW_decoder(
+        .AWID(AWID_mux2dec), 
+        .AWADDR(AWADDR_mux2dec),
+        .AWLEN(AWLEN_mux2dec),
+        .AWSIZE(AWSIZE_mux2dec),
+        .AWBURST(AWBURST_mux2dec),
+        .AWVALID(AWVALID_mux2dec),
+        .AWID_S0(AWID_S0),
+        .AWADDR_S0(AWADDR_S0),
+        .AWLEN_S0(AWLEN_S0),
+        .AWSIZE_S0(AWSIZE_S0),
+        .AWBURST_S0(AWBURST_S0),
+        .AWVALID_S0(AWVALID_S0),
+        .AWID_S1(AWID_S1),
+        .AWADDR_S1(AWADDR_S1),
+        .AWLEN_S1(AWLEN_S1),
+        .AWSIZE_S1(AWSIZE_S1),
+        .AWBURST_S1(AWBURST_S1),
+        .AWVALID_S1(AWVALID_S1)
     );
 //AR
     logic [`AXI_ID_BITS-1:0] ARID_mux2dec,
@@ -218,25 +218,25 @@ module AXI(
         .AxBURST(ARBURST_mux2dec),
         .AxVALID(ARVALID_mux2dec)
     );
-    Ax_decoder AR_decoder(
-        .AxID(ARID_mux2dec), 
-        .AxADDR(ARADDR_mux2dec),
-        .AxLEN(ARLEN_mux2dec),
-        .AxSIZE(ARSIZE_mux2dec),
-        .AxBURST(ARBURST_mux2dec),
-        .AxVALID(ARVALID_mux2dec),
-        .AxID_S0(ARID_S0),
-        .AxADDR_S0(ARADDR_S0),
-        .AxLEN_S0(ARLEN_S0),
-        .AxSIZE_S0(ARSIZE_S0),
-        .AxBURST_S0(ARBURST_S0),
-        .AxVALID_S0(ARVALID_S0),
-        .AxID_S1(ARID_S1),
-        .AxADDR_S1(ARADDR_S1),
-        .AxLEN_S1(ARLEN_S1),
-        .AxSIZE_S1(ARSIZE_S1),
-        .AxBURST_S1(ARBURST_S1),
-        .AxVALID_S1(ARVALID_S1)
+    AR_decoder AR_decoder(
+        .ARID(ARID_mux2dec), 
+        .ARADDR(ARADDR_mux2dec),
+        .ARLEN(ARLEN_mux2dec),
+        .ARSIZE(ARSIZE_mux2dec),
+        .ARBURST(ARBURST_mux2dec),
+        .ARVALID(ARVALID_mux2dec),
+        .ARID_S0(ARID_S0),
+        .ARADDR_S0(ARADDR_S0),
+        .ARLEN_S0(ARLEN_S0),
+        .ARSIZE_S0(ARSIZE_S0),
+        .ARBURST_S0(ARBURST_S0),
+        .ARVALID_S0(ARVALID_S0),
+        .ARID_S1(ARID_S1),
+        .ARADDR_S1(ARADDR_S1),
+        .ARLEN_S1(ARLEN_S1),
+        .ARSIZE_S1(ARSIZE_S1),
+        .ARBURST_S1(ARBURST_S1),
+        .ARVALID_S1(ARVALID_S1)
     );
 
 // Write Data
