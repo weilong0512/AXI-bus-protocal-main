@@ -15,7 +15,7 @@ module Ax_mux (
 
     input logic gnt,
 
-    output [`AXI_ID_BITS-1:0] AxID,
+    output [`AXI_ID_BITS+3:0] AxID,
 	output [`AXI_ADDR_BITS-1:0] AxADDR,
 	output [`AXI_LEN_BITS-1:0] AxLEN,
 	output [`AXI_SIZE_BITS-1:0] AxSIZE,
@@ -28,7 +28,7 @@ module Ax_mux (
         case (gnt)
 
             1'b0:begin
-                AxID = AxID_M0;
+                AxID = {{4'b0000},{AxID_M0}};
 				AxADDR = AxADDR_M0;
 				AxLEN = AxLEN_M0;
 				AxSIZE = AxSIZE_M0;
@@ -37,7 +37,7 @@ module Ax_mux (
             end
 
 			1'b1:begin
-				AxID = AxID_M1;
+				AxID = {{4'b0001},{AxID_M1}};
 				AxADDR = AxADDR_M1;
 				AxLEN = AxLEN_M1;
 				AxSIZE = AxSIZE_M1;

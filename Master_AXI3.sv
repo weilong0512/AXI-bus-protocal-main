@@ -8,6 +8,7 @@
 `include "Ax_mux.sv"
 `include "AW_decoder.sv"
 `include "W_mux.sv"
+`include "arbiter.sv"
 
 module AXI(
 
@@ -141,6 +142,9 @@ module AXI(
 );
     //---------- you should put your design here ----------//
 
+// arbiter
+
+
 
 // AW 
 	logic [`AXI_ID_BITS-1:0] AWID_mux2dec,
@@ -225,7 +229,7 @@ module AXI(
         .ARSIZE(ARSIZE_mux2dec),
         .ARBURST(ARBURST_mux2dec),
         .ARVALID(ARVALID_mux2dec),
-        .ARID_S0(ARID_S0),
+        .ARID_S0(ARID_S0),RRESP_M1
         .ARADDR_S0(ARADDR_S0),
         .ARLEN_S0(ARLEN_S0),
         .ARSIZE_S0(ARSIZE_S0),
@@ -274,7 +278,18 @@ module AXI(
 
 	 
 	
-	
+// BRESP
+
+RRESP_S1
+RRESP_S0
+BRESP_S1
+BRESP_S0
+RRESP_M1
+BRESP_M1
+RRESP_M0
+always_comb begin
+	if(BID_S1 )
+end
 	
     
 	
