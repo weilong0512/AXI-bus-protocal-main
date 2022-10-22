@@ -6,7 +6,7 @@ module RR_ARBITER #(
     input logic clk,
     input logic rst,
     input [1:0] BRESP, RRESP,
-    input []
+    input logic AWVALID, ARVALID,
     input logic[REQ_WIDTH - 1:0] req,
     output logic[REQ_WIDTH - 1:0] gnt
 );

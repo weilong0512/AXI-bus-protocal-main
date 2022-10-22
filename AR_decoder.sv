@@ -5,7 +5,7 @@ module AR_decoder(
 	input [`AXI_SIZE_BITS-1:0] ARSIZE,
 	input [1:0] ARBURST,
 	input ARVALID,
-
+    
     output [`AXI_IDS_BITS+3:0] ARID_S0,
 	output [`AXI_ADDR_BITS-1:0] ARADDR_S0,
 	output [`AXI_LEN_BITS-1:0] ARLEN_S0,

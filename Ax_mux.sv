@@ -27,7 +27,7 @@ module Ax_mux (
 
         case (gnt)
 
-            1'b0:begin
+            2'b01:begin
                 AxID = {{4'b0000},{AxID_M0}};
 				AxADDR = AxADDR_M0;
 				AxLEN = AxLEN_M0;
@@ -36,7 +36,7 @@ module Ax_mux (
 				AxVALID = AxVALID_M0;
             end
 
-			1'b1:begin
+			2'b10:begin
 				AxID = {{4'b0001},{AxID_M1}};
 				AxADDR = AxADDR_M1;
 				AxLEN = AxLEN_M1;
@@ -44,6 +44,8 @@ module Ax_mux (
 				AxBURST = AxBURST_M1;
 				AxVALID = AxVALID_M1;
 			end
+
+			default: ;
             
         endcase
 

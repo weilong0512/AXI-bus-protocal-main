@@ -143,7 +143,18 @@ module AXI(
     //---------- you should put your design here ----------//
 
 // arbiter
-
+	logic [1:0] line_grant; 
+	logic [1:0] line_BRESP;
+	RR_ARBITER arbiter(
+		.clk(ACLK),
+		.rst(ARESETn),
+		.BRESP(line_BRESP),
+		.RRESP(),
+		.AWVALID(),
+		.ARVALID(),
+		.req(),
+		.gnt(line_grant)
+	);
 
 
 // AW 
@@ -166,7 +177,7 @@ module AXI(
         .AxSIZE_M1(AWSIZE_M1),
         .AxBURST_M1(AWBURST_M1),
         .AxVALID_M1(AWVALID_M1),
-        .gnt(), // from arbiter
+        .gnt(line_grant), // from arbiter
         .AxID(AWID_mux2dec), // to decoder
         .AxADDR(AWADDR_mux2dec),
         .AxLEN(AWLEN_mux2dec),
@@ -214,7 +225,7 @@ module AXI(
         .AxSIZE_M1(ARSIZE_M1),
         .AxBURST_M1(ARBURST_M1),
         .AxVALID_M1(ARVALID_M1),
-        .gnt(), // from arbiter
+        .gnt(line_grant), // from arbiter
         .AxID(ARID_mux2dec), // to decoder
         .AxADDR(ARADDR_mux2dec),
         .AxLEN(ARLEN_mux2dec),
@@ -253,7 +264,7 @@ module AXI(
         .WSTRB_M1(WSTRB_M1),
         .WLAST_M1(WLAST_M1),
         .WVALID_M1(WVALID_M1),
-        .gnt(), // from arbiter
+        .gnt(line_grant), // from arbiter
         .WDATA(WDATA_S0),// to Slave 0
         .WSTRB(WSTRB_S0),
         .WLAST(WLAST_S0),
@@ -269,7 +280,7 @@ module AXI(
         .WSTRB_M1(WSTRB_M1),
         .WLAST_M1(WLAST_M1),
         .WVALID_M1(WVALID_M1),
-        .gnt(), // from arbiter
+        .gnt(line_grant), // from arbiter
         .WDATA(WDATA_S1),// to Slave 1
         .WSTRB(WSTRB_S1),
         .WLAST(WLAST_S1),
@@ -282,15 +293,21 @@ module AXI(
 
 RRESP_S1
 RRESP_S0
-BRESP_S1
-BRESP_S0
 RRESP_M1
-BRESP_M1
 RRESP_M0
-always_comb begin
-	if(BID_S1 )
+always_comb begin //accroding to AWID determine the ready signal pass to whom
+	if(AWID_S1[7:4] == 4'b0001 && AWVALID_S1 == 1) begin
+		AWREADY_M1 = AWREADY_S1; // 若ID前4碼為1且S1有收到VALID
+		BRESP_M1 = BRESP_S1; //WRITE response 要assign 給相應的master
+		line_BRESP = BRESP_S1; //同時將此RESP拉回去arbiter 解除arbiter disable
+	end
+	else if (AWID_S0[7:4] == 4'b0001 && AWVALID_S0 == 1 ) begin
+		AWREADY_M1 = AWREADY_S0; // 若ID前4碼為1且S0有收到VALID
+		BRESP_M1 = BRESP_S0; //WRITE response 要assign 給相應的master
+		line_BRESP = BRESP_S0; //同時將此RESP拉回去arbiter 解除arbiter disable
+	end
 end
-	
+
     
 	
 endmodule
