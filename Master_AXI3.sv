@@ -164,26 +164,26 @@ module AXI(
 	logic [`AXI_SIZE_BITS-1:0] AWSIZE_mux2dec,
 	logic [1:0] AWBURST_mux2dec,
 	logic AWVALID_mux2dec,
-    Ax_mux AW_mux(
-        .AxID_M0(AWID_M0),
-        .AxADDR_M0(AWADDR_M0),
-        .AxLEN_M0(AWLEN_M0),
-        .AxSIZE_M0(AWSIZE_M0),
-        .AxBURST_M0(AWBURST_M0),
-        .AxVALID_M0(AWVALID_M0),
-        .AxID_M1(AWID_M1),
-        .AxADDR_M1(AWADDR_M1),
-        .AxLEN_M1(AWLEN_M1),
-        .AxSIZE_M1(AWSIZE_M1),
-        .AxBURST_M1(AWBURST_M1),
-        .AxVALID_M1(AWVALID_M1),
+    AW_mux Aw_mux(
+        // .AWID_M0(AWID_M0),
+        // .AWADDR_M0(AWADDR_M0),
+        // .AWLEN_M0(AWLEN_M0),
+        // .AWSIZE_M0(AWSIZE_M0),
+        // .AWBURST_M0(AWBURST_M0),
+        // .AWVALID_M0(AWVALID_M0),
+        .AWID_M1(AWID_M1),
+        .AWADDR_M1(AWADDR_M1),
+        .AWLEN_M1(AWLEN_M1),
+        .AWSIZE_M1(AWSIZE_M1),
+        .AWBURST_M1(AWBURST_M1),
+        .AWVALID_M1(AWVALID_M1),
         .gnt(line_grant), // from arbiter
-        .AxID(AWID_mux2dec), // to decoder
-        .AxADDR(AWADDR_mux2dec),
-        .AxLEN(AWLEN_mux2dec),
-        .AxSIZE(AWSIZE_mux2dec),
-        .AxBURST(AWBURST_mux2dec),
-        .AxVALID(AWVALID_mux2dec)
+        .AWID(AWID_mux2dec), // to decoder
+        .AWADDR(AWADDR_mux2dec),
+        .AWLEN(AWLEN_mux2dec),
+        .AWSIZE(AWSIZE_mux2dec),
+        .AWBURST(AWBURST_mux2dec),
+        .AWVALID(AWVALID_mux2dec)
     );
     AW_decoder AW_decoder(
         .AWID(AWID_mux2dec), 
@@ -212,26 +212,26 @@ module AXI(
 	logic [`AXI_SIZE_BITS-1:0] ARSIZE_mux2dec,
 	logic [1:0] ARBURST_mux2dec,
 	logic ARVALID_mux2dec,
-    Ax_mux AR_mux(
-        .AxID_M0(ARID_M0),
-        .AxADDR_M0(ARADDR_M0),
-        .AxLEN_M0(ARLEN_M0),
-        .AxSIZE_M0(ARSIZE_M0),
-        .AxBURST_M0(ARBURST_M0),
-        .AxVALID_M0(ARVALID_M0),
-        .AxID_M1(ARID_M1),
-        .AxADDR_M1(ARADDR_M1),
-        .AxLEN_M1(ARLEN_M1),
-        .AxSIZE_M1(ARSIZE_M1),
-        .AxBURST_M1(ARBURST_M1),
-        .AxVALID_M1(ARVALID_M1),
+    AR_mux Ar_mux(
+        .ARID_M0(ARID_M0),
+        .ARADDR_M0(ARADDR_M0),
+        .ARLEN_M0(ARLEN_M0),
+        .ARSIZE_M0(ARSIZE_M0),
+        .ARBURST_M0(ARBURST_M0),
+        .ARVALID_M0(ARVALID_M0),
+        .ARID_M1(ARID_M1),
+        .ARADDR_M1(ARADDR_M1),
+        .ARLEN_M1(ARLEN_M1),
+        .ARSIZE_M1(ARSIZE_M1),
+        .ARBURST_M1(ARBURST_M1),
+        .ARVALID_M1(ARVALID_M1),
         .gnt(line_grant), // from arbiter
-        .AxID(ARID_mux2dec), // to decoder
-        .AxADDR(ARADDR_mux2dec),
-        .AxLEN(ARLEN_mux2dec),
-        .AxSIZE(ARSIZE_mux2dec),
-        .AxBURST(ARBURST_mux2dec),
-        .AxVALID(ARVALID_mux2dec)
+        .ARID(ARID_mux2dec), // to decoder
+        .ARADDR(ARADDR_mux2dec),
+        .ARLEN(ARLEN_mux2dec),
+        .ARSIZE(ARSIZE_mux2dec),
+        .ARBURST(ARBURST_mux2dec),
+        .ARVALID(ARVALID_mux2dec)
     );
     AR_decoder AR_decoder(
         .ARID(ARID_mux2dec), 
@@ -291,20 +291,20 @@ module AXI(
 	
 // BRESP
 
-RRESP_S1
-RRESP_S0
-RRESP_M1
-RRESP_M0
+// RRESP_S1 還沒加上去
+// RRESP_S0
+// RRESP_M1
+// RRESP_M0
 always_comb begin //accroding to AWID determine the ready signal pass to whom
 	if(AWID_S1[7:4] == 4'b0001 && AWVALID_S1 == 1) begin
 		AWREADY_M1 = AWREADY_S1; // 若ID前4碼為1且S1有收到VALID
-		BRESP_M1 = BRESP_S1; //WRITE response 要assign 給相應的master
-		line_BRESP = BRESP_S1; //同時將此RESP拉回去arbiter 解除arbiter disable
+		// BRESP_M1 = BRESP_S1; //WRITE response 要assign 給相應的master
+		// line_BRESP = BRESP_S1; //同時將此RESP拉回去arbiter 解除arbiter disable
 	end
 	else if (AWID_S0[7:4] == 4'b0001 && AWVALID_S0 == 1 ) begin
 		AWREADY_M1 = AWREADY_S0; // 若ID前4碼為1且S0有收到VALID
-		BRESP_M1 = BRESP_S0; //WRITE response 要assign 給相應的master
-		line_BRESP = BRESP_S0; //同時將此RESP拉回去arbiter 解除arbiter disable
+		// BRESP_M1 = BRESP_S0; //WRITE response 要assign 給相應的master
+		// line_BRESP = BRESP_S0; //同時將此RESP拉回去arbiter 解除arbiter disable
 	end
 end
 
