@@ -14,6 +14,7 @@ module AXI(
 
 	input ACLK,
 	input ARESETn,
+	input [1:0] REQUEST,
 
 	//SLAVE INTERFACE FOR MASTERS
 	//WRITE ADDRESS
@@ -148,10 +149,12 @@ module AXI(
 	RR_ARBITER arbiter(
 		.clk(ACLK),
 		.rst(ARESETn),
-		.BRESP(line_BRESP),
-		.RRESP(),
-		.AWVALID(),
-		.ARVALID(),
+		.BRESP(line_BRESP), //根據ID給回覆
+		.RRESP(), //根據ID給回覆
+		.AWVALID_M0(), //這裡直接接線
+		.AWVALID_M1(),
+		.ARVALID_M0(),
+		.ARVALID_M1(),
 		.req(),
 		.gnt(line_grant)
 	);
@@ -298,15 +301,34 @@ module AXI(
 always_comb begin //accroding to AWID determine the ready signal pass to whom
 	if(AWID_S1[7:4] == 4'b0001 && AWVALID_S1 == 1) begin
 		AWREADY_M1 = AWREADY_S1; // 若ID前4碼為1且S1有收到VALID
+		WREADY_M1 = WREADY_S1,
+
 		// BRESP_M1 = BRESP_S1; //WRITE response 要assign 給相應的master
 		// line_BRESP = BRESP_S1; //同時將此RESP拉回去arbiter 解除arbiter disable
 	end
 	else if (AWID_S0[7:4] == 4'b0001 && AWVALID_S0 == 1 ) begin
 		AWREADY_M1 = AWREADY_S0; // 若ID前4碼為1且S0有收到VALID
+		WREADY_M1 = WREADY_S0,
 		// BRESP_M1 = BRESP_S0; //WRITE response 要assign 給相應的master
 		// line_BRESP = BRESP_S0; //同時將此RESP拉回去arbiter 解除arbiter disable
 	end
 end
+
+always_comb begin //accroding to AWID determine the ready signal pass to whom
+	if(BID_S1[7:4] == 4'b0001) begin
+		WREADY_M1 = WREADY_S1; // 若ID前4碼為1且S1有收到VALID
+		// BRESP_M1 = BRESP_S1; //WRITE response 要assign 給相應的master
+		// line_BRESP = BRESP_S1; //同時將此RESP拉回去arbiter 解除arbiter disable
+	end
+	else if (BID_S0[7:4] == 4'b0001) begin
+		WREADY_M1 = WREADY_S0; // 若ID前4碼為1且S0有收到VALID
+		// BRESP_M1 = BRESP_S0; //WRITE response 要assign 給相應的master
+		// line_BRESP = BRESP_S0; //同時將此RESP拉回去arbiter 解除arbiter disable
+	end
+end
+
+//M0 沒有WRITE PORT
+
 
     
 	

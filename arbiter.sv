@@ -6,10 +6,11 @@ module RR_ARBITER #(
     input logic clk,
     input logic rst,
     input [1:0] BRESP, RRESP,
-    input logic AWVALID, ARVALID,
+    input logic AWVALID_M0, AWVALID_M1, ARVALID_M0, ARVALID_M1,
     input logic[REQ_WIDTH - 1:0] req,
     output logic[REQ_WIDTH - 1:0] gnt
 );
+    logic AWVALID, ARVALID,
     logic [REQ_WIDTH-1:0] req_unmasked;    
     logic [REQ_WIDTH-1:0] req_masked;
     logic [REQ_WIDTH-1:0] mask_higher_pri_reqs;
@@ -109,6 +110,17 @@ module RR_ARBITER #(
                 if (req != 0) begin
                     en = 0;
                     gnt = grant; // en = 0 grant 不會 change
+                    case (gnt)
+                        2'b01:begin
+                            AWVALID = AWVALID_M0;
+                            ARVALID = ARVALID_M0;
+                        end 
+                        2'b10:begin
+                            AWVALID = AWVALID_M1;
+                            ARVALID = ARVALID_M1;
+                        end
+                        default: 
+                    endcase
                     if(AWVALID == 1) begin
                         ARBITER_NEXTSTATE = WRITE;
                     end
