@@ -447,7 +447,7 @@ begin
                     BRESP_S1 = 2'b11;
                 BID_S1 =  WID_reg;
                 BVALID_S1 = 1'b1;
-                SLAVEB_NEXTSTATE = RESPONSEB_WAIT;	
+                SLAVEB_NEXTSTATE = RESPONSEB_WAIT;	//ss
 				end
                 
    RESPONSEB_WAIT:begin	
