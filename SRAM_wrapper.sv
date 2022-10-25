@@ -171,7 +171,6 @@ always_comb	begin
 				AWREADY_S1 = 1'b1;
 				AWADDR_reg = AWADDR_S1; //給出ready 並且把addr吃進來， 這個addr要等到下一個AWVALID近來才會被改變，而下個VALID進來須等到下一個request進來(被arbiter控制住)
 				WRITEADDR_NEXTSTATE = AWSLAVE_READY;	
-        		AWID_reg = AWID_S1 ;
 			end
 
 			else begin
@@ -179,14 +178,8 @@ always_comb	begin
 			end
 		end
 					
-		AWSLAVE_READY:begin	
-			
-			if(WVALID_S1) begin 
-				WRITEADDR_NEXTSTATE = AWSLAVE_INIT;
-			end
-			else begin
-				WRITEADDR_NEXTSTATE = AWSLAVE_READY;
-			end
+		WSLAVE_READY:begin	
+			WRITEADDR_NEXTSTATE = AWSLAVE_INIT;
 		end
 	endcase
 end
@@ -237,7 +230,6 @@ always_comb begin
 					WREADY_S1 = 1'b1; // 發出ready訊號
                     WRITED_NEXTSTATE = WSLAVE_READY; 
 					AWBURST_S1_reg = AWBURST_S1; // 回來再吃新的 AWBURST_S1 訊號
-					WID_reg = AWID_reg;
                     //masteraddress = masteraddress_reg; 
                 end
                 else begin
@@ -445,9 +437,11 @@ begin
                     BRESP_S1 = 2'b10;
                 else 
                     BRESP_S1 = 2'b11;
-                BID_S1 =  WID_reg;
+                                                            
+                BID_S1 =  AWID_S1;
+                                
                 BVALID_S1 = 1'b1;
-                SLAVEB_NEXTSTATE = RESPONSEB_WAIT;	//ss
+                SLAVEB_NEXTSTATE = RESPONSEB_WAIT;	
 				end
                 
    RESPONSEB_WAIT:begin	
@@ -468,6 +462,8 @@ enum logic [1:0] {
 	RSLAVE_READY=2'b10} RSLAVE_STATE,RSLAVE_NEXTSTATE;
 
 logic [31:0]ARADDR_reg;
+logic [`AXI_IDS_BITS-1:0] ARID_reg;
+logic [`AXI_LEN_BITS-1:0] ARLEN_reg;
 
 always_ff @(posedge ACLK or negedge ARESETn) begin
 	if (!ARESETn)	begin
@@ -481,15 +477,17 @@ end
 always_comb begin 	
     case (RSLAVE_STATE)
   		RSLAVE_INIT:begin
-            ARREADY_S1 = 1'b0;
+            ARREADY_S1 = 1'b1;
             RSLAVE_NEXTSTATE = RSLAVE_WAIT;
         end
             
   		RSLAVE_WAIT:begin
             if (ARVALID_S1) begin
-				ARREADY_S1 = 1'b1;
 				ARADDR_reg = ARADDR_S1;//給出ready 並且把addr吃進來， 這個addr要等到下一個AWVALID近來才會被改變，而下個VALID進來須等到下一個request進來(被arbiter控制住)
                 RSLAVE_NEXTSTATE = RSLAVE_READY;
+                ARID_reg = ARID_S1;
+                ARLEN_reg = ARLEN_S1; 
+               
 			end
             else begin
                 RSLAVE_NEXTSTATE = RSLAVE_WAIT;
@@ -514,7 +512,7 @@ enum logic [2:0] {
 	RDSLAVE_READY=3'b010, 
 	RDSLAVE_RWAIT=3'b011,
 	RDSLAVE_ERROR=3'b100 } RDSLAVE_STATE, RDSLAVE_NEXTSTATE;
-logic R_FLAG;
+logic R_FLAG, FINISH;
 logic [3:0] Counter, Next_Counter;
 logic [31:0] readdata_address, readdata_address_reg;
     
@@ -537,16 +535,17 @@ always_comb	begin
 			RID_S1 = 0;
 			RDATA_S1 = 0;
 			RRESP_S1 = 0;
-			RLAST_S1 = 0;
+			//RLAST_S1 == 0;
 			RVALID_S1 = 0;
 			readdata_address = 0;
-			R_FLAG = 0;
+			//R_FLAG = 0;
 			Next_Counter = 0;
 			A = 0;
 			DI = 32'b0;
 			WEB = 4'b1111;
 			CS = 0;
 			OE = 0;
+      RLAST_S1 = 0;
 			RDSLAVE_NEXTSTATE = RDSLAVE_WAIT;
 
 		end
@@ -560,6 +559,7 @@ always_comb	begin
 			end
 
 			else begin
+        FINISH = 0;      
         RLAST_S1 = 0;
 				OE = 0;
         RID_S1 = 0;
@@ -577,9 +577,10 @@ always_comb	begin
 			Next_Counter = 0; // FLAG = 0 代表第一次
    */
 
-			if(ARREADY_S1) begin
+			if(ARVALID_S1 && ARREADY_S1) begin
 				OE = 0; //進入READY STATE時先將OE設定成0 //第一次進也會先被設定成0
 				RDSLAVE_NEXTSTATE = RDSLAVE_READY;
+        
 			end 
 
 			else
@@ -591,7 +592,7 @@ always_comb	begin
 
 				unique case(ARBURST_S1) //下個CYCLE要OE = 1且根據LW、LB、LH、LHU、LBU調整DO是多少
 					2'b00:begin // SINGLE
-            			RID_S1 = ARID_S1; //若addr合法(ISRAM or DSRAM 且 transfer size 不超過4 byte)
+            //RID_S1 = ARID_reg; //若addr合法(ISRAM or DSRAM 且 transfer size 不超過4 byte)
 						readdata_address = ARADDR_reg;
 						A =readdata_address[15:2];
 						DI = 32'b0;
@@ -604,7 +605,7 @@ always_comb	begin
 							readdata_address = ARADDR_reg;
 							R_FLAG = 1;
 							OE = 0; //第一次進來(第1個cycle)
-              				RID_S1 = ARID_S1; //若addr合法(ISRAM or DSRAM 且 transfer size 不超過4 byte)
+              //RID_S1 = ARID_reg; //若addr合法(ISRAM or DSRAM 且 transfer size 不超過4 byte)
 						end
 						else begin
 							OE = 1; //第二次進來不透過WAIT STATE那邊去設定OE = 1 (我的想法是會這樣dalay 1 個cycle 取得上一個cycle的正確data ? ) ;
@@ -647,23 +648,26 @@ always_comb	begin
 				endcase
 
 				RVALID_S1 = 1; //取到data 設定VALID = 1
-				Next_Counter=Counter+4'b1; // counter + 1
-        		RRESP_S1  = 2'b00;
-				if(RREADY_S1 == 1) begin //等到RREADY 
-					if(Next_Counter == ARLEN_S1+4'b1) begin // 回到WAIT STATE繼續等待ARREADY
-						RLAST_S1 = 1;
-						R_FLAG = 0; // 然後打R_FLAG pull down to 0
-						RDSLAVE_NEXTSTATE = RDSLAVE_INIT;
-					end
-					else begin // 還沒完成就回到同個STATE繼續做
-						RLAST_S1 = 0;
-						RDSLAVE_NEXTSTATE = RDSLAVE_READY;
-					end
-  				end
-  				else if(RREADY_S1 == 0) begin
-          			RLAST_S1 = 0;
-          			RDSLAVE_NEXTSTATE = RDSLAVE_RWAIT; //沒到繼續等
-        		end
+				Next_Counter = Counter+4'b1; // counter + 1
+        RRESP_S1  = 2'b00;
+        RID_S1 = ARID_reg;                
+        if(Next_Counter == ARLEN_reg+4'b1) begin // 回到WAIT STATE繼續等待ARREADY
+            RLAST_S1 = 1;
+            R_FLAG = 0; // 然後打R_FLAG pull down to 0
+  					if(RREADY_S1 == 1) begin
+                ARREADY_S1 = 0;
+                 RDSLAVE_NEXTSTATE = RDSLAVE_INIT;
+             end
+             else RDSLAVE_NEXTSTATE = RDSLAVE_RWAIT;
+       end
+       else begin // 還沒完成就回到同個STATE繼續做
+           RLAST_S1 = 0;
+				    if(RREADY_S1 == 1) begin
+                 RDSLAVE_NEXTSTATE = RDSLAVE_READY;
+             end
+             else RDSLAVE_NEXTSTATE = RDSLAVE_RWAIT;
+				end
+        
  
 			end
 
@@ -685,8 +689,9 @@ always_comb	begin
 		RDSLAVE_RWAIT:begin // wait for RREADY_S1 == 1
 			
 			if(RREADY_S1 == 1) begin //等到RREADY 
-				if(Next_Counter == ARLEN_S1+4'b1) begin // 回到WAIT STATE繼續等待ARREADY
+				if(Next_Counter == ARLEN_reg+4'b1) begin // 回到WAIT STATE繼續等待ARREADY
                     RLAST_S1 = 1;
+                    ARREADY_S1 = 0;
                     R_FLAG = 0; // 然後打R_FLAG pull down to 0 
 					RDSLAVE_NEXTSTATE = RDSLAVE_INIT;
                 end
