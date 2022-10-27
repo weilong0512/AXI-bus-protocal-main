@@ -143,7 +143,7 @@ SRAM i_SRAM (
 enum logic [1:0]{
     AW_INIT = 2'b00,
     AW_WAIT = 2'b01,
-    AW_START = 2'b10,
+    AW_START = 2'b10
 } AW_STATE, AW_NEXTSTATE;
 
 logic [`AXI_IDS_BITS-1:0] AWID_reg;
@@ -171,11 +171,21 @@ always_comb begin
         
         AW_INIT:begin
             AWREADY = 1'b1;
+            AWADDR_reg = 0;
+            AWBURST_reg = 0;
+            AWID_reg = 0;
+            AWSIZE_reg = 0;
+            AWLEN_reg = 0;
             AW_NEXTSTATE = AW_WAIT;
         end
 
         AW_WAIT:begin
             if(AWVALID == 1)begin
+                AWADDR_reg = AWADDR;
+                AWBURST_reg = AWBURST;
+                AWID_reg = AWID;
+                AWSIZE_reg = AWSIZE;
+                AWLEN_reg = AWLEN;
                 AW_NEXTSTATE = AW_START;
             end
 
@@ -185,8 +195,13 @@ always_comb begin
         end
 
         AW_START:begin
-            AWREADY = 1'b0;
-            AW_NEXTSTATE = AW_INIT;
+            if(WVALID == 1) begin
+                AWREADY = 1'b0;
+				WRITEADDR_NEXTSTATE = AWSLAVE_INIT;
+            end
+            else begin
+                WRITEADDR_NEXTSTATE = AWSLAVE_START;
+            end
         end
 
     endcase
@@ -206,7 +221,7 @@ enum logic [1:0]{
 // [`AXI_LEN_BITS-1:0] AWLEN_reg;
 // [`AXI_SIZE_BITS-1:0] AWSIZE_reg;
 // [1:0] AWBURST_reg;
-logic [`AXI_IDS_BITS-1:0] WID_reg, BID_reg, Write_ID;
+logic [`AXI_IDS_BITS-1:0] WID_reg, BID_reg, Write_ID, BID_final_reg;
 logic [`AXI_ADDR_BITS-1:0] WADDR_reg, MasterAddr;
 logic [`AXI_LEN_BITS-1:0] WLEN_reg, Write_LEN;
 logic [`AXI_SIZE_BITS-1:0] WSIZE_reg, Write_SIZE;
@@ -215,7 +230,7 @@ logic [`AXI_DATA_BITS-1:0] WDATA_reg, Write_DATA;
 logic [`AXI_STRB_BITS-1:0] WSTRB_reg, Write_STRB;
 logic WLAST_reg, Write_LAST;
 logic W_FLAG;
-logic [31:0] write_addr_reg, write_addr;
+logic [31:0] write_addr_reg, write_addr ;
 logic [1:0] BRESP_reg;
 
 parameter [5:0] TOKEN = 6'b000001; 
@@ -233,20 +248,13 @@ end
 
 always_comb begin
 
-    if( AWVALID == 1 && AWREADY == 1) begin // handshake 1 次
-        AWADDR_reg = AWADDR;
-        AWBURST_reg = AWBURST;
-        AWID_reg = AWID;
-        AWSIZE_reg = AWSIZE;
-        AWLEN_reg = AWLEN;
-    end
-
     case (W_STATE)
         
         W_INIT:begin
             WREADY = 1'b1;
-            BREADY = 0;
             W_FLAG = 0;
+            write_addr = 0;
+            write_addr_reg = 0;
             WADDR_reg = 0;
             WBURST_reg = 0;
             WID_reg = 0;
@@ -255,12 +263,14 @@ always_comb begin
             WDATA_reg = 0; 
             WSTRB_reg = 0;
             WLAST_reg = 0;
+            write_addr = 0;
+            write_addr_reg = 0;
             W_NEXTSTATE = W_WAIT;
         end
 
         W_WAIT:begin
             if(WVALID == 1)begin
-                if(!W_FLAG) begin //這次是第一次HS  、 single會回到這裡
+                if(!W_FLAG) begin
                     WADDR_reg = AWADDR_reg;
                     WBURST_reg = AWBURST_reg;
                     WID_reg = AWID_reg_reg;
@@ -269,11 +279,12 @@ always_comb begin
                     WDATA_reg = WDATA; 
                     WSTRB_reg = WSTRB;
                     WLAST_reg = WLAST;
-                    BREADY = 1;
+                    write_addr = WADDR_reg;
                 end
-                else begin //這次不是第一次HS
-                    WDATA_reg = WDATA;
+                else begin
+                    WDATA_reg = WDATA; 
                     WLAST_reg = WLAST;
+                    write_addr = write_addr_reg;
                 end
 
                 W_NEXTSTATE = W_START; 
@@ -285,215 +296,235 @@ always_comb begin
         end
 
         W_START:begin
-            
-            MasterAddr = WADDR_reg;
-            Write_BURST = WBURST_reg;
-            Write_ID = WID_reg;
-            Write_SIZE = WSIZE_reg;
-            Write_LEN = WLEN_reg;
-            Write_DATA = WDATA_reg; 
-            Write_STRB = WSTRB_reg;
-            Write_LAST = WLAST_reg;
-
-            if(MasterAddr >= 32'h2_0000 || MasterAddr < 32'h1_0000 || Write_SIZE > 3'b011) begin //錯誤的時候donothing 等待last
-                unique case(Write_BURST)
-                    2'b00:begin // SINGLE
-                        BID_reg = Write_ID;
-                        W_NEXTSTATE = W_FINISH;
-
-                    end
-                                    
-                    2'b01:begin // INCR
-                        if(!W_FLAG) begin //第一次進到INCR FLAG 在WAIT STATE被設0
-                            write_addr = MasterAddr; //拿到剛剛AWVALID == 1 跟 AWREADY == 1 時拿到的addr
-                            W_FLAG = 1'b1; 
-                        end
-                        else write_addr = write_addr_reg; //第二次開始遵從上一輪 write_addr = write_addr + ( 1 << AWSIZE_S1 ) ;
-
-
-                        if(Write_LAST == 1) begin
-                            BID_reg = Write_ID;
-                            W_NEXTSTATE = W_FINISH;
-                        end
-                        else begin
-                            W_NEXTSTATE = W_WAIT;
-                        end
-                    end
-                
-
-                    default:;
-
-                endcase
-
-                if(MasterAddr < 32'h1_0000 || Write_SIZE > 3'b011)begin
-                    BRESP_reg = 2'b01;
-                end
-                else BRESP_reg = 2'b11;
-
+            if(WLAST_reg) begin
+                W_FLAG = 0;
+                BID_reg = WID_reg;
+                W_NEXTSTATE = W_FINISH;
             end
-
             else begin
-                unique case(Write_BURST)
-                    2'b00:begin // SINGLE
-                        write_addr = MasterAddr;
-                        
-                        unique case (Write_STRB)
-                            4'b1111:begin // SW
-                                A = write_addr[15:2];
-                                DI = Write_DATA;
-                                WEB = 4'b0000;
-                                CS = 1;
-                            end
-
-                            4'b0011:begin // SH
-                                A = write_addr[15:2];
-                                case(write_addr[1:0])
-                                    2'b00:begin
-                                        DI = {{16{1'b0}},{Write_DATA[15:0]}};
-                                        WEB = 4'b1100;
-                                        CS = 1;
-                                    end
-                                    2'b10:begin
-                                        DI = {{Write_DATA[15:0]},{16{1'b0}}};
-                                        WEB = 4'b0011;
-                                        CS = 1;
-                                    end
-                                endcase
-                            end
-
-                            4'b0001:begin //SB
-                                A = write_addr[15:2];
-                                case(write_addr[1:0])
-                                    2'b00:begin
-                                        DI = {{24{1'b0}},{Write_DATA[7:0]}};
-                                        WEB = 4'b1110;
-                                        CS = 1;
-                                    end
-                                    2'b01:begin
-                                        DI = {{16{1'b0}},{Write_DATA[7:0]},{8{1'b0}}};
-                                        WEB = 4'b1101;
-                                        CS = 1;
-                                    end
-                                    2'b10:begin
-                                        DI = {{8{1'b0}},{Write_DATA[7:0]},{16{1'b0}}};
-                                        WEB = 4'b1011;
-                                        CS = 1;
-                                    end
-                                    2'b10:begin
-                                        DI = {{Write_DATA[15:0]},{24{1'b0}}};
-                                        WEB = 4'b0111;
-                                        CS = 1;
-                                    end
-                                endcase
-                            end
-                                
-                            default: begin
-                            end	
-
-                        endcase // single結束沒有改寫, FLAG == 0
-                        BRESP_reg = 2'b00;
-                        BID_reg = Write_ID;
-                        W_NEXTSTATE = W_FINISH;
-
-                    end
-                                    
-                    2'b01:begin // INCR
-                        if(!W_FLAG) begin //第一次進到INCR, FLAG == 0
-                            write_addr = MasterAddr; //拿到剛剛AWVALID == 1 跟 AWREADY == 1 時拿到的addr
-                            W_FLAG = 1'b1; 
-                        end
-                        else write_addr = write_addr_reg; //第二次開始遵從上一輪 write_addr_reg = write_addr + ( 1 << AWSIZE_S1 ) ;
-
-                        unique case (Write_STRB)
-                            4'b1111:begin // SW
-                                A = write_addr[15:2];
-                                DI = Write_DATA;
-                                WEB = 4'b0000;
-                                CS = 1;
-                                write_addr_reg = write_addr + ( TOKEN << AWSIZE_S1 ) ;
-                            end
-
-                            4'b0011:begin // SH
-                                A = write_addr[15:2];
-                                case(write_addr[1:0])
-                                    2'b00:begin
-                                        DI = {{16{1'b0}},{Write_DATA[15:0]}};
-                                        WEB = 4'b1100;
-                                        CS = 1;
-                                        write_addr_reg = write_addr + ( TOKEN << AWSIZE_S1 ) ;
-                                    end
-                                    2'b10:begin
-                                        DI = {{Write_DATA[15:0]},{16{1'b0}}};
-                                        WEB = 4'b0011;
-                                        CS = 1;
-                                        write_addr_reg = write_addr + ( TOKEN << AWSIZE_S1 ) ;
-                                    end
-                                endcase
-                            end
-
-                            4'b0001:begin //SB
-                                A = write_addr[15:2];
-                                case(write_addr[1:0])
-                                    2'b00:begin
-                                        DI = {{24{1'b0}},{Write_DATA[7:0]}};
-                                        WEB = 4'b1110;
-                                        CS = 1;
-                                        write_addr_reg = write_addr + ( TOKEN << AWSIZE_S1 ) ;
-                                    end
-                                    2'b01:begin
-                                        DI = {{16{1'b0}},{Write_DATA[7:0]},{8{1'b0}}};
-                                        WEB = 4'b1101;
-                                        CS = 1;
-                                        write_addr_reg = write_addr + ( TOKEN << AWSIZE_S1 ) ;
-                                    end
-                                    2'b10:begin
-                                        DI = {{8{1'b0}},{Write_DATA[7:0]},{16{1'b0}}};
-                                        WEB = 4'b1011;
-                                        CS = 1;
-                                        write_addr_reg = write_addr + ( TOKEN << AWSIZE_S1 ) ;
-                                    end
-                                    2'b10:begin
-                                        DI = {{Write_DATA[15:0]},{24{1'b0}}};
-                                        WEB = 4'b0111;
-                                        CS = 1;
-                                        write_addr_reg = write_addr + ( TOKEN << AWSIZE_S1 ) ;
-                                    end
-                                endcase
-                            end
-                                
-                            default: begin
-                            end	
-
-                        endcase
-
-                        if(Write_LAST == 1) begin
-                            BRESP_reg = 2'b00;
-                            BID_reg = Write_ID;
-                            W_NEXTSTATE = W_FINISH;
-                        end
-                        else begin
-                            W_NEXTSTATE = W_WAIT;
-                        end
-                    end
-                endcase
-            
+                W_FLAG = 1;
+                W_NEXTSTATE = W_WAIT;
             end
+            
+            unique case(WBURST_reg)
+                2'b00:begin // SINGLE
+                    
+                    unique case (WSTRB_reg)
+                        4'b1111:begin // SW
+                            A = write_addr[15:2];
+                            DI = Write_DATA;
+                            WEB = 4'b0000;
+                            CS = 1;
+                        end
+
+                        4'b0011:begin // SH
+                            A = write_addr[15:2];
+                            case(write_addr[1:0])
+                                2'b00:begin
+                                    DI = {{16{1'b0}},{Write_DATA[15:0]}};
+                                    WEB = 4'b1100;
+                                    CS = 1;
+                                end
+                                2'b10:begin
+                                    DI = {{Write_DATA[15:0]},{16{1'b0}}};
+                                    WEB = 4'b0011;
+                                    CS = 1;
+                                end
+                            endcase
+                        end
+
+                        4'b0001:begin //SB
+                            A = write_addr[15:2];
+                            case(write_addr[1:0])
+                                2'b00:begin
+                                    DI = {{24{1'b0}},{Write_DATA[7:0]}};
+                                    WEB = 4'b1110;
+                                    CS = 1;
+                                end
+                                2'b01:begin
+                                    DI = {{16{1'b0}},{Write_DATA[7:0]},{8{1'b0}}};
+                                    WEB = 4'b1101;
+                                    CS = 1;
+                                end
+                                2'b10:begin
+                                    DI = {{8{1'b0}},{Write_DATA[7:0]},{16{1'b0}}};
+                                    WEB = 4'b1011;
+                                    CS = 1;
+                                end
+                                2'b10:begin
+                                    DI = {{Write_DATA[15:0]},{24{1'b0}}};
+                                    WEB = 4'b0111;
+                                    CS = 1;
+                                end
+                            endcase
+                        end
+                            
+                        default: begin
+                        end	
+
+                    endcase
+                end
+                                
+                2'b01:begin // INCR
+                    unique case (WSTRB_reg)
+                        4'b1111:begin // SW
+                            A = write_addr[15:2];
+                            DI = Write_DATA;
+                            WEB = 4'b0000;
+                            CS = 1;
+                            write_addr_reg = write_addr + ( TOKEN << WSIZE_reg ) ;
+                        end
+
+                        4'b0011:begin // SH
+                            A = write_addr[15:2];
+                            case(write_addr[1:0])
+                                2'b00:begin
+                                    DI = {{16{1'b0}},{Write_DATA[15:0]}};
+                                    WEB = 4'b1100;
+                                    CS = 1;
+                                    write_addr_reg = write_addr + ( TOKEN << WSIZE_reg ) ;
+                                end
+                                2'b10:begin
+                                    DI = {{Write_DATA[15:0]},{16{1'b0}}};
+                                    WEB = 4'b0011;
+                                    CS = 1;
+                                    write_addr_reg = write_addr + ( TOKEN << WSIZE_reg ) ;
+                                end
+                            endcase
+                        end
+
+                        4'b0001:begin //SB
+                            A = write_addr[15:2];
+                            case(write_addr[1:0])
+                                2'b00:begin
+                                    DI = {{24{1'b0}},{Write_DATA[7:0]}};
+                                    WEB = 4'b1110;
+                                    CS = 1;
+                                    write_addr_reg = write_addr + ( TOKEN << WSIZE_reg ) ;
+                                end
+                                2'b01:begin
+                                    DI = {{16{1'b0}},{Write_DATA[7:0]},{8{1'b0}}};
+                                    WEB = 4'b1101;
+                                    CS = 1;
+                                    write_addr_reg = write_addr + ( TOKEN << WSIZE_reg ) ;
+                                end
+                                2'b10:begin
+                                    DI = {{8{1'b0}},{Write_DATA[7:0]},{16{1'b0}}};
+                                    WEB = 4'b1011;
+                                    CS = 1;
+                                    write_addr_reg = write_addr + ( TOKEN << WSIZE_reg ) ;
+                                end
+                                2'b10:begin
+                                    DI = {{Write_DATA[15:0]},{24{1'b0}}};
+                                    WEB = 4'b0111;
+                                    CS = 1;
+                                    write_addr_reg = write_addr + ( TOKEN << WSIZE_reg ) ;
+                                end
+                            endcase
+                        end
+                            
+                        default: begin
+                        end	
+
+                    endcase
+                end
+            
+
+                default:;
+
+            endcase
+
+
+            
+            
+            
         end
 
 
         W_FINISH:begin
             WREADY = 1'b0;
-            if(BVALID == 1) begin
-                BRESP = BRESP_reg;
-                BID = BID_reg;
-                W_NEXTSTATE = W_INIT;
-            end
-            else W_NEXTSTATE = W_FINISH;
+            W_NEXTSTATE = W_INIT;
         end
 
     endcase
 
 end
+
+///////////////////////////////////////FSM for Write Response Channel of Slave\\\\\\\\\\\\\\\\\\\\\\\////////////
+/////////////////Write Response Channel for slave
+enum logic [2:0] { 
+B_INIT=3'b000, 
+B_LAST=3'b001, 
+B_START=3'b010, 
+B_WAIT=3'b011, 
+B_VALID=3'b100 } B_STATE, B_NEXTSTATE;
+
+always_ff @(posedge ACLK or negedge ARESETn)	
+begin	
+	if(!ARESETn)	begin
+		B_STATE <= B_INIT;
+	end
+	else
+		B_STATE <= B_NEXTSTATE;
+end
+
+
+always_comb 
+begin
+	case(B_STATE)
+        B_INIT:begin
+            BID = 0;
+            BRESP = 0;
+            BVALID = 0;
+            BRESP_reg = 0;
+            BID_final_reg = 0;
+            B_NEXTSTATE = B_LAST;
+        end
+            
+        B_LAST:begin		
+            if(WLAST_reg) begin
+                B_NEXTSTATE = B_START;
+            end
+            else begin
+                B_NEXTSTATE = B_LAST;
+                end
+        end
+
+        B_START:begin
+            if ( write_addr > 32'hffff &&  write_addr <=32'h1_ffff && WSIZE_reg <3'b011) // 如果沒有寫錯位置 應該OK
+                BRESP_reg = 2'b00;
+            else if( (write_addr >= 32'h0 &&  write_addr <=32'hffff) || WSIZE_reg >= 3'b011) // 位置是read only 會回覆錯誤位置 或是size超過line bit size 
+                BRESP_reg = 2'b10;
+            else 
+                BRESP_reg = 2'b11;
+            BID_final_reg =  BID_reg;
+            BVALID = 1'b1;
+            if (BREADY == 1)	begin
+                BID = BID_final_reg;
+                BRESP = BRESP_reg;
+                B_NEXTSTATE = B_INIT;
+            end
+            else begin
+                B_NEXTSTATE = B_WAIT;
+            end
+        end
+                
+        B_WAIT:begin	
+            if (BREADY == 1)	begin
+                BID = BID_final_reg;
+                BRESP = BRESP_reg;
+                B_NEXTSTATE = B_INIT;
+            end
+            else begin
+                B_NEXTSTATE = B_WAIT;
+            end
+        end
+	endcase
+end	
+
+
+
+
 
 
 //////////////////////////////////////////////FSM for Read Address Channel of Slave \\\\\\\\\\\\\\\\\\\\\\\/////////////\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\//
@@ -514,12 +545,22 @@ end
 always_comb begin 	
     case (AR_STATE)
   		AR_INIT:begin
-            ARREADY_S1 = 1'b1;
+            ARREADY = 1'b1;
+            ARADDR_reg = 0;
+            ARID_reg = 0;
+            ARLEN_reg = 0;
+            ARSIZE_reg = 0;
+            ARBURST_reg = 0;
             AR_NEXTSTATE = AR_WAIT;
         end
             
   		AR_WAIT:begin
-            if (ARVALID_S1) begin
+            if (ARVALID) begin
+                ARADDR_reg = ARADDR;
+                ARID_reg = ARID;
+                ARLEN_reg = ARLEN;
+                ARSIZE_reg = ARSIZE;
+                ARBURST_reg = ARBURST;
                 AR_NEXTSTATE = AR_READY;
 			end
             else begin
@@ -528,7 +569,7 @@ always_comb begin
         end
             
  		AR_READY:begin
-            ARREADY_S1 = 1'b0;
+            ARREADY = 1'b0;
             AR_NEXTSTATE = AR_INIT;
         end
     endcase
@@ -555,16 +596,23 @@ logic R_FLAG, RLAST_reg;
 logic [3:0]counter, next_counter; 
 logic [1:0] RRESP_reg;
 
-
+always_ff @(posedge ACLK or negedge ARESETn) begin
+	if (!ARESETn)	begin
+		R_STATE <= R_INIT;
+	end
+	else	begin
+		R_STATE <= R_NEXTSTATE;
+	end
+end	
 
 always_comb begin 	
     case (R_STATE)
   		R_INIT:begin
-            ARADDR_reg = 0;
-            ARID_reg = 0;
-            ARLEN_reg = 0;
-            ARSIZE_reg = 0;
-            ARBURST_reg = 0;
+            RADDR_reg = 0;
+            RID_reg = 0;
+            RLEN_reg = 0;
+            RSIZE_reg = 0;
+            RBURST_reg = 0;
             RRESP_reg = 0;
             RVALID = 0;
             R_FLAG = 0;
@@ -581,11 +629,6 @@ always_comb begin
             
   		R_ARWAIT:begin
             if(ARVALID == 1 && ARREADY == 1) begin
-                ARADDR_reg = ARADDR;
-                ARID_reg = ARID;
-                ARLEN_reg = ARLEN;
-                ARSIZE_reg = ARSIZE;
-                ARBURST_reg = ARBURST;
                 R_NEXTSTATE = R_RWAIT;
             end
             else begin
@@ -598,7 +641,7 @@ always_comb begin
             RADDR_reg = ARADDR_reg;
             RSIZE_reg = ARSIZE_reg;
             RBURST_reg = ARBURST_reg;
-            RLEN_reg = ARLEN_reg
+            RLEN_reg = ARLEN_reg;
             Read_ID = ARID_reg;
             if(RADDR_reg >= 32'h0000 && RADDR_reg < 32'h2_0000 && RSIZE_reg < 3'b011) begin
                 unique case(RBURST_reg) //下個CYCLE要OE = 1且根據LW、LB、LH、LHU、LBU調整DO是多少
@@ -776,7 +819,7 @@ always_comb begin
             if(RREADY == 1) begin
                 OE = 1;
                 RDATA = DO; 
-                if(RLAST_reg = 1) begin
+                if(RLAST_reg == 1) begin
                     RLAST = 1;
                     RRESP = RRESP_reg;
                     R_NEXTSTATE = R_INIT;
@@ -796,7 +839,7 @@ always_comb begin
         R_ERROR:begin
             RID = RID_reg;
             if(RREADY == 1) begin
-                if(RLAST_reg = 1) begin
+                if(RLAST_reg == 1) begin
                     RLAST = 1;
                     RRESP = RRESP_reg;
                     R_NEXTSTATE = R_INIT;
