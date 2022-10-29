@@ -149,16 +149,6 @@ enum logic [3:0]{
     WRITE_VALID=4'b0101,
     READ_VALID=4'b0110,
     READ_ERROR=4'b0111,
-<<<<<<< HEAD
-    READ_LAST=4'b1000,
-    READ_VALID=4'b1001,
-    READ_ERROR=4'b1010,
-} STATE, NXSTATE;
-
-logic [`AXI_IDS_BITS-1:0] AWID_reg, ARID_reg;
-logic [`AXI_ADDR_BITS-1:0] AWADDR_reg_D, AWADDR_reg_Q, ARADDR_reg_D, ARADDR_reg_Q;
-logic [`AXI_LEN_BITS-1:0] AWLEN_reg, ARLEN_reg_Q, ARLEN_reg_D;
-=======
     READ_LAST = 4'b1000,
     READ_VALID_WAIT = 4'b1001,
     READ_ERROR_WAIT = 4'b1010
@@ -167,7 +157,6 @@ logic [`AXI_LEN_BITS-1:0] AWLEN_reg, ARLEN_reg_Q, ARLEN_reg_D;
 logic [`AXI_IDS_BITS-1:0] AWID_reg, ARID_reg;
 logic [`AXI_ADDR_BITS-1:0] AWADDR_reg_Q, ARADDR_reg_Q, AWADDR_reg_D, ARADDR_reg_D;
 logic [`AXI_LEN_BITS-1:0] AWLEN_reg , ARLEN_reg_D, ARLEN_reg_Q;
->>>>>>> 8be989d36b5d9e7cb267ee23ef1722effc684273
 logic [`AXI_SIZE_BITS-1:0] AWSIZE_reg, ARSIZE_reg;
 logic [1:0] AWBURST_reg, ARBURST_reg;
 parameter [5:0] TOKEN = 6'b000001; 
@@ -185,27 +174,19 @@ always_ff @(posedge ACLK or negedge ARESETn) begin
         STATE <= INIT;
         AWADDR_reg_Q <= 0;
         ARADDR_reg_Q <= 0;
-<<<<<<< HEAD
-        ARLEN_reg_Q <= 0;
-=======
         Counter <= 0;
         ARLEN_reg_Q <= 0;
         //AWLEN_reg_Q <= 0;
->>>>>>> 8be989d36b5d9e7cb267ee23ef1722effc684273
     end
 
     else begin
         STATE <= NXSTATE;
         AWADDR_reg_Q <= AWADDR_reg_D;
         ARADDR_reg_Q <= ARADDR_reg_D;
-<<<<<<< HEAD
-        ARLEN_reg_Q <= ARLEN_reg_D;
-=======
         Counter <= Next_Counter;
         ARLEN_reg_Q <= ARLEN_reg_D ;
         //AWLEN_reg_Q <= AWLEN_reg_D ;
 
->>>>>>> 8be989d36b5d9e7cb267ee23ef1722effc684273
     end
 
 end
@@ -234,12 +215,7 @@ always_comb begin
             AWBURST_reg = 0;
             // AR_reg
             ARID_reg = 0;
-<<<<<<< HEAD
-            ARADDR_reg = 0;
-            ARLEN_reg_D = 0;
-=======
             //ARLEN_reg = 0;
->>>>>>> 8be989d36b5d9e7cb267ee23ef1722effc684273
             ARSIZE_reg = 0;
             ARBURST_reg = 0;
             //
@@ -276,8 +252,6 @@ always_comb begin
             
             else NXSTATE = WAIT;
 
-            else ;
-
         end
 
         WRITE_WAIT:begin
@@ -303,7 +277,6 @@ always_comb begin
             else begin
                 NXSTATE = WRITE_WAIT;
             end
-            else ;
 
             //
             if(AWADDR_reg_Q >= 32'h1_0000 && AWADDR_reg_Q < 32'h2_0000 && AWSIZE_reg < 3'b011) begin
@@ -511,19 +484,9 @@ always_comb begin
 
 				endcase
                 ARLEN_reg_D = ARLEN_reg_Q - 1;
-<<<<<<< HEAD
-                if(ARLEN_reg_D == 0) begin
-                    RLAST_reg = 1;
-                end
-
-                else begin
-                    RLAST_reg = 0;
-                end
-=======
                 //RRESP_reg = 2'b00;
                 RVALID = 0;
                 //RID = ARID_reg;
->>>>>>> 8be989d36b5d9e7cb267ee23ef1722effc684273
                 NXSTATE = READ_VALID;
                 if(ARLEN_reg_D == 0)begin
                   RLAST_reg = 1;
@@ -535,22 +498,6 @@ always_comb begin
             end
 
             else begin
-<<<<<<< HEAD
-                ARLEN_reg_D = ARLEN_reg_Q - 1;
-
-                if( (ARADDR_reg_Q >= 32'h0 &&  ARADDR_reg_Q <=32'hffff) || ARSIZE_reg >= 3'b011) // 位置是read only 會回覆錯誤位置 或是size超過line bit size 
-                    RRESP_reg = 2'b10;
-                else 
-                    RRESP_reg = 2'b11;
-
-                if(ARLEN_reg_D == 0) begin
-                    RLAST_reg = 1;
-                end
-
-                else begin
-                    RLAST_reg = 0;
-                end
-=======
                 Next_Counter = Counter + 1;
                 if( (ARADDR_reg_Q >= 32'h0 &&  ARADDR_reg_Q <=32'hffff) &&  ARSIZE_reg >= 3'b011) // 位置是read only 會回覆錯誤位置 或是size超過line bit size 
                     RRESP_reg = 2'b10;
@@ -558,7 +505,6 @@ always_comb begin
                     RRESP_reg = 2'b11;
                 RVALID = 0;
                 //RID = ARID_reg;
->>>>>>> 8be989d36b5d9e7cb267ee23ef1722effc684273
                 NXSTATE = READ_ERROR;
                 if(ARLEN_reg_D == 0)begin
                   RLAST_reg = 1;
@@ -574,35 +520,6 @@ always_comb begin
 
         READ_VALID:begin
             RVALID = 1;
-<<<<<<< HEAD
-            RRESP = 2'b00;
-            OE = 1;
-            CS = 0;
-            RDATA = DO;
-            RID = ARID_reg;
-            if(RREADY == 1 && RLAST_reg == 1) begin
-                NXSTATE = READ_LAST;
-            end
-
-            else if(RREADY == 1 && RLAST_reg == 0) begin
-                NXSTATE = READ_WAIT;
-            end
-
-            else begin
-                NXSTATE = READ_VALID_WAIT;
-            end
-
-
-        end
-
-        READ_VALID_WAIT:begin
-            if(RREADY == 1 && RLAST_reg == 1) begin
-                NXSTATE = READ_LAST;
-            end
-
-            else if(RREADY == 1 && RLAST_reg == 0) begin
-                NXSTATE = READ_WAIT;
-=======
             RLAST = RLAST_reg;
             RRESP = 2'b00;
             RID = ARID_reg;
@@ -628,7 +545,6 @@ always_comb begin
         READ_VALID_WAIT:begin
             if(RREADY == 1 && RLAST_reg == 1) begin
               NXSTATE = READ_LAST;
->>>>>>> 8be989d36b5d9e7cb267ee23ef1722effc684273
             end
             
             else if(RREADY == 1 && RLAST_reg == 0) begin
@@ -636,11 +552,7 @@ always_comb begin
             end
             
             else begin
-<<<<<<< HEAD
-                NXSTATE = READ_VALID_WAIT;
-=======
               NXSTATE = READ_VALID_WAIT;
->>>>>>> 8be989d36b5d9e7cb267ee23ef1722effc684273
             end
 
 
@@ -650,34 +562,6 @@ always_comb begin
         READ_ERROR:begin
             RVALID = 1;
             RRESP = RRESP_reg;
-<<<<<<< HEAD
-            OE = 1;
-            CS = 0;
-            RDATA = DO;
-            RID = ARID_reg;
-
-            if(RREADY == 1 && RLAST_reg == 1) begin
-                NXSTATE = READ_LAST;
-            end
-
-            else if(RREADY == 1 && RLAST_reg == 0) begin
-                NXSTATE = READ_WAIT;
-            end
-
-            else begin
-                NXSTATE = READ_ERROR_WAIT;
-            end
-        end
-
-        READ_ERROR_WAIT:begin
-
-            if(RREADY == 1 && RLAST_reg == 1) begin
-                NXSTATE = READ_LAST;
-            end
-
-            else if(RREADY == 1 && RLAST_reg == 0) begin
-                NXSTATE = READ_WAIT;
-=======
             RID = ARID_reg;
             RLAST = RLAST_reg;
             CS = 1;
@@ -687,7 +571,6 @@ always_comb begin
             
             if(RREADY == 1 && RLAST_reg == 1) begin
               NXSTATE = READ_LAST;
->>>>>>> 8be989d36b5d9e7cb267ee23ef1722effc684273
             end
             
             else if(RREADY == 1 && RLAST_reg == 0) begin
@@ -695,11 +578,7 @@ always_comb begin
             end
             
             else begin
-<<<<<<< HEAD
-                NXSTATE = READ_ERROR_WAIT;
-=======
               NXSTATE = READ_ERROR_WAIT;
->>>>>>> 8be989d36b5d9e7cb267ee23ef1722effc684273
             end
         end
         
@@ -731,17 +610,8 @@ always_comb begin
         
         default:;                
 
-        READ_LAST:begin
-            RVALID = 0;
-            RLAST = 1;
-            OE = 1;
-            RDATA = DO;
-            NXSTATE = INIT;
-
-        end
-
     endcase
 
 end
 
-endmodule 
+endmodule
