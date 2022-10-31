@@ -74,24 +74,24 @@ module AXI(
 
 	//MASTER INTERFACE FOR SLAVES
 	//WRITE ADDRESS0
-	output [`AXI_IDS_BITS-1:0] AWID_S0,
-	output [`AXI_ADDR_BITS-1:0] AWADDR_S0,
-	output [`AXI_LEN_BITS-1:0] AWLEN_S0,
-	output [`AXI_SIZE_BITS-1:0] AWSIZE_S0,
-	output [1:0] AWBURST_S0,
-	output AWVALID_S0,
+	output logic [`AXI_IDS_BITS-1:0] AWID_S0,
+	output logic [`AXI_ADDR_BITS-1:0] AWADDR_S0,
+	output logic [`AXI_LEN_BITS-1:0] AWLEN_S0,
+	output logic [`AXI_SIZE_BITS-1:0] AWSIZE_S0,
+	output logic [1:0] AWBURST_S0,
+	output logic AWVALID_S0,
 	input AWREADY_S0,
 	//WRITE DATA0
-	output [`AXI_DATA_BITS-1:0] WDATA_S0,
-	output [`AXI_STRB_BITS-1:0] WSTRB_S0,
-	output WLAST_S0,
-	output WVALID_S0,
+	output logic [`AXI_DATA_BITS-1:0] WDATA_S0,
+	output logic [`AXI_STRB_BITS-1:0] WSTRB_S0,
+	output logic WLAST_S0,
+	output logic WVALID_S0,
 	input WREADY_S0,
 	//WRITE RESPONSE0
 	input [`AXI_IDS_BITS-1:0] BID_S0,
 	input [1:0] BRESP_S0,
 	input BVALID_S0,
-	output BREADY_S0,
+	output logic BREADY_S0,
 	
 	//WRITE ADDRESS1
 	output logic  [`AXI_IDS_BITS-1:0] AWID_S1,
@@ -294,12 +294,12 @@ module AXI(
 
 
 // AW 
-	logic [`AXI_ID_BITS-1:0] AWID_mux2dec,
-	logic [`AXI_ADDR_BITS-1:0] AWADDR_mux2dec,
-	logic [`AXI_LEN_BITS-1:0] AWLEN_mux2dec,
-	logic [`AXI_SIZE_BITS-1:0] AWSIZE_mux2dec,
-	logic [1:0] AWBURST_mux2dec,
-	logic AWVALID_mux2dec,
+	logic [`AXI_ID_BITS-1:0] AWID_mux2dec;
+	logic [`AXI_ADDR_BITS-1:0] AWADDR_mux2dec;
+	logic [`AXI_LEN_BITS-1:0] AWLEN_mux2dec;
+	logic [`AXI_SIZE_BITS-1:0] AWSIZE_mux2dec;
+	logic [1:0] AWBURST_mux2dec;
+	logic AWVALID_mux2dec;
     AW_mux Aw_mux(
         // .AWID_M0(AWID_M0),
         // .AWADDR_M0(AWADDR_M0),
@@ -343,12 +343,12 @@ module AXI(
     );
 
 //AR
-    logic [`AXI_ID_BITS-1:0] ARID_mux2dec,
-	logic [`AXI_ADDR_BITS-1:0] ARADDR_mux2dec,
-	logic [`AXI_LEN_BITS-1:0] ARLEN_mux2dec,
-	logic [`AXI_SIZE_BITS-1:0] ARSIZE_mux2dec,
-	logic [1:0] ARBURST_mux2dec,
-	logic ARVALID_mux2dec,
+    logic [`AXI_ID_BITS-1:0] ARID_mux2dec;
+	logic [`AXI_ADDR_BITS-1:0] ARADDR_mux2dec;
+	logic [`AXI_LEN_BITS-1:0] ARLEN_mux2dec;
+	logic [`AXI_SIZE_BITS-1:0] ARSIZE_mux2dec;
+	logic [1:0] ARBURST_mux2dec;
+	logic ARVALID_mux2dec;
     AR_mux Ar_mux(
         .ARID_M0(ARID_M0_reg_q),
         .ARADDR_M0(ARADDR_M0_reg_q),
@@ -739,50 +739,78 @@ assign AWREADY_S1_reg_d = AWREADY_S1;
 
 assign AWREADY_M1 = AWREADY_M1_reg_q;
 
+enum{
+	first,
+	second
+}AW_s, AW_ns;
+
+always_ff@(posedge ACLK, negedge ARESETn) begin
+	if(!ARESETn) AW_s <= first;
+	else AW_s <= AW_ns;
+end
+
 always_comb begin
+	unique case(AW_s)
+		first: begin
+			unique if(AWVALID_S0 == 1 && AWREADY_S0 == 1) begin
+				AWID_S0 = 0;
+				AWADDR_S0 = 0;
+				AWLEN_S0 = 0;
+				AWSIZE_S0 = 0;
+				AWBURST_S0 = 0;
+				AWID_S1 = 0;
+				AWADDR_S1 = 0;
+				AWLEN_S1 = 0;
+				AWSIZE_S1 = 0;
+				AWBURST_S1 = 0;
+				AWREADY_M1_reg_d = AWREADY_S0_reg_q
+				AW_ns = second;
+			end
 
-	unique if(AWVALID_S0 == 1 && AWREADY_S0 == 1) begin
-		AWID_S0 = AWID_S0_reg_q;
-		AWADDR_S0 = AWADDR_S0_reg_q;
-		AWLEN_S0 = AWLEN_S0_reg_q;
-		AWSIZE_S0 = AWSIZE_S0_reg_q;
-		AWBURST_S0 = AWBURST_S0_reg_q;
-		AWID_S1 = 0;
-		AWADDR_S1 = 0;
-		AWLEN_S1 = 0;
-		AWSIZE_S1 = 0;
-		AWBURST_S1 = 0;
-		AWREADY_M1_reg_d = AWREADY_S0_reg_q
-	end
+			else if(AWVALID_S1 == 1 && AWREADY_S1 == 1) begin
+				AWID_S1 = 0;
+				AWADDR_S1 = 0;
+				AWLEN_S1 = 0;
+				AWSIZE_S1 = 0;
+				AWBURST_S1 = 0;
+				AWID_S0 = 0;
+				AWADDR_S0 = 0;
+				AWLEN_S0 = 0;
+				AWSIZE_S0 = 0;
+				AWBURST_S0 = 0;
+				AWREADY_M1_reg_d = AWREADY_S1_reg_q;
+				AW_ns = second;
+			end
 
-	else if(AWVALID_S1 == 1 && AWREADY_S1 == 1) begin
-		AWID_S1 = AWID_S1_reg_q;
-		AWADDR_S1 = AWADDR_S1_reg_q;
-		AWLEN_S1 = AWLEN_S1_reg_q;
-		AWSIZE_S1 = AWSIZE_S1_reg_q;
-		AWBURST_S1 = AWBURST_S1_reg_q;
-		AWID_S0 = 0;
-		AWADDR_S0 = 0;
-		AWLEN_S0 = 0;
-		AWSIZE_S0 = 0;
-		AWBURST_S0 = 0;
-		AWREADY_M1_reg_d = AWREADY_S1_reg_q;
-	end
-
-	else begin
-		AWID_S0 = 0;
-		AWADDR_S0 = 0;
-		AWLEN_S0 = 0;
-		AWSIZE_S0 = 0;
-		AWBURST_S0 = 0;
-		AWID_S1 = 0;
-		AWADDR_S1 = 0;
-		AWLEN_S1 = 0;
-		AWSIZE_S1 = 0;
-		AWBURST_S1 = 0;
-		AWREADY_M1_reg_d = 0;
-	end
-
+			else begin
+				AWID_S0 = 0;
+				AWADDR_S0 = 0;
+				AWLEN_S0 = 0;
+				AWSIZE_S0 = 0;
+				AWBURST_S0 = 0;
+				AWID_S1 = 0;
+				AWADDR_S1 = 0;
+				AWLEN_S1 = 0;
+				AWSIZE_S1 = 0;
+				AWBURST_S1 = 0;
+				AWREADY_M1_reg_d = 0;
+				AW_ns = first;
+			end
+		end
+		second:begin
+			AWID_S1 = AWID_S1_reg_q;
+			AWADDR_S1 = AWADDR_S1_reg_q;
+			AWLEN_S1 = AWLEN_S1_reg_q;
+			AWSIZE_S1 = AWSIZE_S1_reg_q;
+			AWBURST_S1 = AWBURST_S1_reg_q;
+			AWID_S0 = AWID_S0_reg_q;
+			AWADDR_S0 = AWADDR_S0_reg_q;
+			AWLEN_S0 = AWLEN_S0_reg_q;
+			AWSIZE_S0 = AWSIZE_S0_reg_q;
+			AWBURST_S0 = AWBURST_S0_reg_q;
+			AW_ns = first;
+		end
+	endcase
 end
 
 
@@ -843,17 +871,17 @@ always_comb begin
 	unique if(BVALID_S0 == 1 && BREADY_S0 == 1)begin
 		BID_M1_reg_d = BID_S0_reg_q;
 		BRESP_M1_reg_d = BRESP_S0_reg_q;
-		BVALID_M1_req_d = BVALID_S0_reg_q;
+		BVALID_M1_reg_d = BVALID_S0_reg_q;
 	end
 	else if (BVALID_S1 == 1 && BREADY_S1 == 1)begin
 		BID_M1_reg_d = BID_S1_reg_q;
 		BRESP_M1_reg_d = BRESP_S1_reg_q;
-		BVALID_M1_req_d = BVALID_S1_reg_q;
+		BVALID_M1_reg_d = BVALID_S1_reg_q;
 	end
 	else begin
 		BID_M1_reg_d = 0;
 		BRESP_M1_reg_d = 0;
-		BVALID_M1_req_d = 0;
+		BVALID_M1_reg_d = 0;
 	end
 
 end
