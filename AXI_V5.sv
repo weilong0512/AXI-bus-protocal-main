@@ -164,6 +164,12 @@ module AXI(
 
 
 	//READ ADDRESS0
+	// logic [`AXI_ID_BITS-1:0] ARID_M0_reg_d, ARID_M0_reg_q;
+	// logic [`AXI_ADDR_BITS-1:0] ARADDR_M0_reg_d, ARADDR_M0_reg_q;
+	// logic [`AXI_LEN_BITS-1:0] ARLEN_M0_reg_d, ARLEN_M0_reg_q;
+	// logic [`AXI_SIZE_BITS-1:0] ARSIZE_M0_reg_d, ARSIZE_M0_reg_q;
+	// logic [1:0] ARBURST_M0_reg_d, ARBURST_M0_reg_q;
+	// logic ARVALID_M0_reg_d, ARVALID_M0_reg_q;
 	logic ARREADY_M0_reg_d, ARREADY_M0_reg_q;
 
 
@@ -407,7 +413,7 @@ assign ARBURST_S1 = ARBURST_S1_reg_q;
 assign ARVALID_S1 = ARVALID_S1_reg_q;
 
 // Write Data
-    W_mux W_mux_S0(
+     W_mux W_mux_S0(
         // .WDATA_M0(WDATA_M0_reg_q),
         // .WSTRB_M0(WSTRB_M0_reg_q),
         // .WLAST_M0(WLAST_M0_reg_q),
