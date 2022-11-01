@@ -157,10 +157,10 @@ module AXI(
 	// logic WVALID_M1_reg_d, WVALID_M1_reg_q;
 	logic WREADY_M1_reg_d, WREADY_M1_reg_q;
 	//WRITE RESPONSE
-	// logic [`AXI_ID_BITS-1:0] BID_M1_reg_d, BID_M1_reg_q;
-	// logic [1:0] BRESP_M1_reg_d, BRESP_M1_reg_q;
-	// logic BVALID_M1_reg_d, BVALID_M1_reg_q;
-	logic BREADY_M1_reg_d, BREADY_M1_reg_q;
+	logic [`AXI_ID_BITS-1:0] BID_M1_reg_d, BID_M1_reg_q;
+	logic [1:0] BRESP_M1_reg_d, BRESP_M1_reg_q;
+	logic BVALID_M1_reg_d, BVALID_M1_reg_q;
+	// logic BREADY_M1_reg_d, BREADY_M1_reg_q;
 
 	//READ ADDRESS0
 	// logic [`AXI_ID_BITS-1:0] ARID_M0_reg_d, ARID_M0_reg_q;
@@ -229,10 +229,10 @@ module AXI(
 	logic WVALID_S1_reg_d, WVALID_S1_reg_q, WVALID_S1_temp;
 
 	//WRITE RESPONSE1
-	logic [`AXI_IDS_BITS-1:0] BID_S1_reg_d, BID_S1_reg_q, BID_S1_temp;
-	logic [1:0] BRESP_S1_reg_d, BRESP_S1_reg_q, BRESP_S1_temp;
-	logic BVALID_S1_reg_d, BVALID_S1_reg_q, BVALID_S1_temp;
-	// logic BREADY_S1_reg_d, BREADY_S1_reg_q;
+	// logic [`AXI_IDS_BITS-1:0] BID_S1_reg_d, BID_S1_reg_q, BID_S1_temp;
+	// logic [1:0] BRESP_S1_reg_d, BRESP_S1_reg_q, BRESP_S1_temp;
+	// logic BVALID_S1_reg_d, BVALID_S1_reg_q, BVALID_S1_temp;
+	logic BREADY_S1_reg_d, BREADY_S1_reg_q;
 	
 	//READ ADDRESS0
 	logic [`AXI_IDS_BITS-1:0] ARID_S0_reg_d, ARID_S0_reg_q;
@@ -485,7 +485,7 @@ always_ff @(posedge ACLK or negedge ARESETn) begin
 		BID_M1_reg_q <= 0;
 		BRESP_M1_reg_q <= 0;
 		BVALID_M1_reg_q <= 0;
-		BREADY_M1_reg_q <= 0;
+		// BREADY_M1_reg_q <= 0;
 
 		//READ ADDRESS0
 		ARID_M0_reg_q <= 0;
@@ -533,9 +533,9 @@ always_ff @(posedge ACLK or negedge ARESETn) begin
 		WVALID_S0_reg_q <= 0;
 		// WREADY_S0_reg_q <= 0;
 		//WRITE RESPONSE0
-		BID_S0_reg_q <= 0;
-		BRESP_S0_reg_q <= 0;
-		BVALID_S0_reg_q <= 0;
+		// BID_S0_reg_q <= 0;
+		// BRESP_S0_reg_q <= 0;
+		// BVALID_S0_reg_q <= 0;
 		BREADY_S0_reg_q <= 0;
 		
 		//WRITE ADDRESS1
@@ -552,9 +552,9 @@ always_ff @(posedge ACLK or negedge ARESETn) begin
 		WVALID_S1_reg_q <= 0;
 		// WREADY_S1_reg_q <= 0;
 		//WRITE RESPONSE1
-		BID_S1_reg_q <= 0;
-		BRESP_S1_reg_q <= 0;
-		BVALID_S1_reg_q <= 0;
+		// BID_S1_reg_q <= 0;
+		// BRESP_S1_reg_q <= 0;
+		// BVALID_S1_reg_q <= 0;
 		BREADY_S1_reg_q <= 0;
 		
 		//READ ADDRESS0
@@ -594,24 +594,25 @@ always_ff @(posedge ACLK or negedge ARESETn) begin
 
 		//SLAVE INTERFACE FOR MASTERS
 		//WRITE ADDRESS
-		AWID_M1_reg_q <= AWID_M1_reg_d;
-		AWADDR_M1_reg_q <= AWADDR_M1_reg_d;
-		AWLEN_M1_reg_q <= AWLEN_M1_reg_d;
-		AWSIZE_M1_reg_q <= AWSIZE_M1_reg_d;
-		AWBURST_M1_reg_q <= AWBURST_M1_reg_d;
-		AWVALID_M1_reg_q <= AWVALID_M1_reg_d;
+		// AWID_M1_reg_q <= AWID_M1_reg_d;
+		// AWADDR_M1_reg_q <= AWADDR_M1_reg_d;
+		// AWLEN_M1_reg_q <= AWLEN_M1_reg_d;
+		// AWSIZE_M1_reg_q <= AWSIZE_M1_reg_d;
+		// AWBURST_M1_reg_q <= AWBURST_M1_reg_d;
+		// AWVALID_M1_reg_q <= AWVALID_M1_reg_d;
+        AWREADY_M1_reg_q <= AWREADY_M1_reg_d;
 
 		//WRITE DATA
-		WDATA_M1_reg_q <= WDATA_M1_reg_d;
-		WSTRB_M1_reg_q <= WSTRB_M1_reg_d;
-		WLAST_M1_reg_q <= WLAST_M1_reg_d;
-		WVALID_M1_reg_q <= WVALID_M1_reg_d;
+		// WDATA_M1_reg_q <= WDATA_M1_reg_d;
+		// WSTRB_M1_reg_q <= WSTRB_M1_reg_d;
+		// WLAST_M1_reg_q <= WLAST_M1_reg_d;
+		// WVALID_M1_reg_q <= WVALID_M1_reg_d;
 		WREADY_M1_reg_q <= WREADY_M1_reg_d;
 		//WRITE RESPONSE
 		BID_M1_reg_q <= BID_M1_reg_d;
 		BRESP_M1_reg_q <= BRESP_M1_reg_d;
 		BVALID_M1_reg_q <= BVALID_M1_reg_d;
-		BREADY_M1_reg_q <= BREADY_M1_reg_d;
+		// BREADY_M1_reg_q <= BREADY_M1_reg_d;
 
 		//READ ADDRESS0
 		ARID_M0_reg_q <= ARID_M0_reg_d;
@@ -653,11 +654,11 @@ always_ff @(posedge ACLK or negedge ARESETn) begin
 		WSTRB_S0_reg_q <= WSTRB_S0_reg_d;
 		WLAST_S0_reg_q <= WLAST_S0_reg_d;
 		WVALID_S0_reg_q <= WVALID_S0_reg_d;
-		WREADY_S0_reg_q <= WREADY_S0_reg_d;
+		// WREADY_S0_reg_q <= WREADY_S0_reg_d;
 		//WRITE RESPONSE0
-		BID_S0_reg_q <= BID_S0_reg_d;
-		BRESP_S0_reg_q <= BRESP_S0_reg_d;
-		BVALID_S0_reg_q <= BVALID_S0_reg_d;
+		// BID_S0_reg_q <= BID_S0_reg_d;
+		// BRESP_S0_reg_q <= BRESP_S0_reg_d;
+		// BVALID_S0_reg_q <= BVALID_S0_reg_d;
 		BREADY_S0_reg_q <= BREADY_S0_reg_d;
 		
 		//WRITE ADDRESS1
@@ -668,11 +669,11 @@ always_ff @(posedge ACLK or negedge ARESETn) begin
 		WSTRB_S1_reg_q <= WSTRB_S1_reg_d;
 		WLAST_S1_reg_q <= WLAST_S1_reg_d;
 		WVALID_S1_reg_q <= WVALID_S1_reg_d;
-		WREADY_S1_reg_q <= WREADY_S1_reg_d;
+		// WREADY_S1_reg_q <= WREADY_S1_reg_d;
 		//WRITE RESPONSE1
-		BID_S1_reg_q <= BID_S1_reg_d;
-		BRESP_S1_reg_q <= BRESP_S1_reg_d;
-		BVALID_S1_reg_q <= BVALID_S1_reg_d;
+		// BID_S1_reg_q <= BID_S1_reg_d;
+		// BRESP_S1_reg_q <= BRESP_S1_reg_d;
+		// BVALID_S1_reg_q <= BVALID_S1_reg_d;
 		BREADY_S1_reg_q <= BREADY_S1_reg_d;
 		
 		//READ ADDRESS0
@@ -776,10 +777,10 @@ always_comb begin
 		WVALID_S0_reg_d = WVALID_S0_reg_q;
     end
     else begin
-        WDATA_S0_reg_d = WDATA_S0_temp
-		WSTRB_S0_reg_d = WSTRB_S0_temp
-		WLAST_S0_reg_d = WLAST_S0_temp
-		WVALID_S0_reg_d = WVALID_S0_temp
+        WDATA_S0_reg_d = WDATA_S0_temp;
+		WSTRB_S0_reg_d = WSTRB_S0_temp;
+		WLAST_S0_reg_d = WLAST_S0_temp;
+		WVALID_S0_reg_d = WVALID_S0_temp;
     end
 end
 
@@ -791,10 +792,10 @@ always_comb begin
 		WVALID_S1_reg_d = WVALID_S1_reg_q;
     end
     else begin
-        WDATA_S1_reg_d = WDATA_S1_temp
-		WSTRB_S1_reg_d = WSTRB_S1_temp
-		WLAST_S1_reg_d = WLAST_S1_temp
-		WVALID_S1_reg_d = WVALID_S1_temp
+        WDATA_S1_reg_d = WDATA_S1_temp;
+		WSTRB_S1_reg_d = WSTRB_S1_temp;
+		WLAST_S1_reg_d = WLAST_S1_temp;
+		WVALID_S1_reg_d = WVALID_S1_temp;
     end
 end
 
