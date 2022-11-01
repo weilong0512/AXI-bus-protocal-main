@@ -145,30 +145,30 @@ module AXI(
 	output logic RREADY_S1 
 	
 );
-	logic [1:0] REQUEST_reg_d, REQUEST_reg_q;
+	//logic [1:0] REQUEST_reg_d, REQUEST_reg_q;
 
 	//SLAVE INTERFACE FOR MASTERS
 	//WRITE ADDRESS
 	logic AWREADY_M1_reg_d, AWREADY_M1_reg_q;
 	//WRITE DATA
-	logic [`AXI_DATA_BITS-1:0] WDATA_M1_reg_d, WDATA_M1_reg_q;
-	logic [`AXI_STRB_BITS-1:0] WSTRB_M1_reg_d, WSTRB_M1_reg_q;
-	logic WLAST_M1_reg_d, WLAST_M1_reg_q;
-	logic WVALID_M1_reg_d, WVALID_M1_reg_q;
+	// logic [`AXI_DATA_BITS-1:0] WDATA_M1_reg_d, WDATA_M1_reg_q;
+	// logic [`AXI_STRB_BITS-1:0] WSTRB_M1_reg_d, WSTRB_M1_reg_q;
+	// logic WLAST_M1_reg_d, WLAST_M1_reg_q;
+	// logic WVALID_M1_reg_d, WVALID_M1_reg_q;
 	logic WREADY_M1_reg_d, WREADY_M1_reg_q;
 	//WRITE RESPONSE
-	logic [`AXI_ID_BITS-1:0] BID_M1_reg_d, BID_M1_reg_q;
-	logic [1:0] BRESP_M1_reg_d, BRESP_M1_reg_q;
-	logic BVALID_M1_reg_d, BVALID_M1_reg_q;
+	// logic [`AXI_ID_BITS-1:0] BID_M1_reg_d, BID_M1_reg_q;
+	// logic [1:0] BRESP_M1_reg_d, BRESP_M1_reg_q;
+	// logic BVALID_M1_reg_d, BVALID_M1_reg_q;
 	logic BREADY_M1_reg_d, BREADY_M1_reg_q;
 
 	//READ ADDRESS0
-	logic [`AXI_ID_BITS-1:0] ARID_M0_reg_d, ARID_M0_reg_q;
-	logic [`AXI_ADDR_BITS-1:0] ARADDR_M0_reg_d, ARADDR_M0_reg_q;
-	logic [`AXI_LEN_BITS-1:0] ARLEN_M0_reg_d, ARLEN_M0_reg_q;
-	logic [`AXI_SIZE_BITS-1:0] ARSIZE_M0_reg_d, ARSIZE_M0_reg_q;
-	logic [1:0] ARBURST_M0_reg_d, ARBURST_M0_reg_q;
-	logic ARVALID_M0_reg_d, ARVALID_M0_reg_q;
+	// logic [`AXI_ID_BITS-1:0] ARID_M0_reg_d, ARID_M0_reg_q;
+	// logic [`AXI_ADDR_BITS-1:0] ARADDR_M0_reg_d, ARADDR_M0_reg_q;
+	// logic [`AXI_LEN_BITS-1:0] ARLEN_M0_reg_d, ARLEN_M0_reg_q;
+	// logic [`AXI_SIZE_BITS-1:0] ARSIZE_M0_reg_d, ARSIZE_M0_reg_q;
+	// logic [1:0] ARBURST_M0_reg_d, ARBURST_M0_reg_q;
+	// logic ARVALID_M0_reg_d, ARVALID_M0_reg_q;
 	logic ARREADY_M0_reg_d, ARREADY_M0_reg_q;
 	//READ DATA0
 	logic [`AXI_ID_BITS-1:0] RID_M0_reg_d, RID_M0_reg_q;
@@ -203,16 +203,16 @@ module AXI(
 	logic AWVALID_S0_reg_d, AWVALID_S0_reg_q, AWVALID_S0_temp;
 
 	//WRITE DATA0
-	logic [`AXI_DATA_BITS-1:0] WDATA_S0_reg_d, WDATA_S0_reg_q;
-	logic [`AXI_STRB_BITS-1:0] WSTRB_S0_reg_d, WSTRB_S0_reg_q;
-	logic WLAST_S0_reg_d, WLAST_S0_reg_q;
-	logic WVALID_S0_reg_d, WVALID_S0_reg_q;
-	logic WREADY_S0_reg_d, WREADY_S0_reg_q;
+	logic [`AXI_DATA_BITS-1:0] WDATA_S0_reg_d, WDATA_S0_reg_q, WDATA_S0_temp;
+	logic [`AXI_STRB_BITS-1:0] WSTRB_S0_reg_d, WSTRB_S0_reg_q, WSTRB_S0_temp;
+	logic WLAST_S0_reg_d, WLAST_S0_reg_q, WLAST_S0_temp;
+	logic WVALID_S0_reg_d, WVALID_S0_reg_q, WVALID_S0_temp;
+
 	//WRITE RESPONSE0
-	logic [`AXI_IDS_BITS-1:0] BID_S0_reg_d, BID_S0_reg_q;
-	logic [1:0] BRESP_S0_reg_d, BRESP_S0_reg_q;
-	logic BVALID_S0_reg_d, BVALID_S0_reg_q;
-	logic BREADY_S0_reg_d, BREADY_S0_reg_q;
+	logic [`AXI_IDS_BITS-1:0] BID_S0_reg_d, BID_S0_reg_q, BID_S0_temp;
+	logic [1:0] BRESP_S0_reg_d, BRESP_S0_reg_q, BRESP_S0_temp;
+	logic BVALID_S0_reg_d, BVALID_S0_reg_q, BVALID_S0_temp;
+	// logic BREADY_S0_reg_d, BREADY_S0_reg_q;
 	
 	//WRITE ADDRESS1
 	logic [`AXI_ID_BITS-1:0] AWID_S1_reg_d, AWID_S1_reg_q, AWID_S1_temp;
@@ -223,16 +223,16 @@ module AXI(
 	logic AWVALID_S1_reg_d, AWVALID_S1_reg_q, AWVALID_S1_temp;
 
 	//WRITE DATA1
-	logic [`AXI_DATA_BITS-1:0] WDATA_S1_reg_d, WDATA_S1_reg_q;
-	logic [`AXI_STRB_BITS-1:0] WSTRB_S1_reg_d, WSTRB_S1_reg_q;
-	logic WLAST_S1_reg_d, WLAST_S1_reg_q;
-	logic WVALID_S1_reg_d, WVALID_S1_reg_q;
-	logic WREADY_S1_reg_d, WREADY_S1_reg_q;
+	logic [`AXI_DATA_BITS-1:0] WDATA_S1_reg_d, WDATA_S1_reg_q, WDATA_S1_temp;
+	logic [`AXI_STRB_BITS-1:0] WSTRB_S1_reg_d, WSTRB_S1_reg_q, WSTRB_S1_temp;
+	logic WLAST_S1_reg_d, WLAST_S1_reg_q, WLAST_S1_temp;
+	logic WVALID_S1_reg_d, WVALID_S1_reg_q, WVALID_S1_temp;
+
 	//WRITE RESPONSE1
-	logic [`AXI_IDS_BITS-1:0] BID_S1_reg_d, BID_S1_reg_q;
-	logic [1:0] BRESP_S1_reg_d, BRESP_S1_reg_q;
-	logic BVALID_S1_reg_d, BVALID_S1_reg_q;
-	logic BREADY_S1_reg_d, BREADY_S1_reg_q;
+	logic [`AXI_IDS_BITS-1:0] BID_S1_reg_d, BID_S1_reg_q, BID_S1_temp;
+	logic [1:0] BRESP_S1_reg_d, BRESP_S1_reg_q, BRESP_S1_temp;
+	logic BVALID_S1_reg_d, BVALID_S1_reg_q, BVALID_S1_temp;
+	// logic BREADY_S1_reg_d, BREADY_S1_reg_q;
 	
 	//READ ADDRESS0
 	logic [`AXI_IDS_BITS-1:0] ARID_S0_reg_d, ARID_S0_reg_q;
@@ -281,7 +281,7 @@ module AXI(
 		.RVALID_S1(RVALID_S1_reg_q),
 		.RREADY_M1(RREADY_M1_reg_q),
 		.RREADY_M0(RREADY_M0_reg_q),
-		.req(REQUEST_reg_q),
+		.req(REQUEST),
 		.gnt(line_grant)
 	);
 	assign cpu_gnt = line_grant;
@@ -307,7 +307,7 @@ module AXI(
         .AWSIZE_M1(AWSIZE_M1),
         .AWBURST_M1(AWBURST_M1),
         .AWVALID_M1(AWVALID_M1),
-        .gnt(line_grant_q), // from arbiter
+        .gnt(line_grant), // from arbiter
         .AWID(AWID_mux2dec), // to decoder
         .AWADDR(AWADDR_mux2dec),
         .AWLEN(AWLEN_mux2dec),
@@ -335,6 +335,16 @@ module AXI(
         .AWBURST_S1(AWBURST_S1_temp),
         .AWVALID_S1(AWVALID_S1_temp)
     );
+
+    // assign BID_S0_temp = BID_S0;
+    // assign BRESP_S0_temp = BRESP_S0;
+    // assign BVALID_S0_temp = BVALID_S0;
+    // assign BREADY_S0_reg_d = BREADY_M1;
+    // assign BID_S1_temp = BID_S1;
+    // assign BRESP_S1_temp = BRESP_S1;
+    // assign BVALID_S1_temp = BVALID_S1;
+    // assign BREADY_S1_reg_d = BREADY_M1;
+
 
 // //AR
 //     logic [`AXI_ID_BITS-1:0] ARID_mux2dec;
@@ -385,38 +395,38 @@ module AXI(
 //         .ARVALID_S1(ARVALID_S1_reg_q)
 //     );
 
-// // Write Data
-//     W_mux W_mux_S0(
-//         .WDATA_M0(WDATA_M0_reg_q),
-//         .WSTRB_M0(WSTRB_M0_reg_q),
-//         .WLAST_M0(WLAST_M0_reg_q),
-//         .WVALID_M0(WVALID_M0_reg_q),
-//         .WDATA_M1(WDATA_M1_reg_q),
-//         .WSTRB_M1(WSTRB_M1_reg_q),
-//         .WLAST_M1(WLAST_M1_reg_q),
-//         .WVALID_M1(WVALID_M1_reg_q),
-//         .gnt(line_grant), // from arbiter
-//         .WDATA(WDATA_S0_reg_d),// to Slave 0
-//         .WSTRB(WSTRB_S0_reg_d),
-//         .WLAST(WLAST_S0_reg_d),
-//         .WVALID(WVALID_S0_reg_d)
-//     );
+// Write Data
+    W_mux W_mux_S0(
+        // .WDATA_M0(WDATA_M0_reg_q),
+        // .WSTRB_M0(WSTRB_M0_reg_q),
+        // .WLAST_M0(WLAST_M0_reg_q),
+        // .WVALID_M0(WVALID_M0_reg_q),
+        .WDATA_M1(WDATA_M1),
+        .WSTRB_M1(WSTRB_M1),
+        .WLAST_M1(WLAST_M1),
+        .WVALID_M1(WVALID_M1),
+        .gnt(line_grant), // from arbiter
+        .WDATA(WDATA_S0_temp),// to Slave 0
+        .WSTRB(WSTRB_S0_temp),
+        .WLAST(WLAST_S0_temp),
+        .WVALID(WVALID_S0_temp)
+    );
 
-//     W_mux W_mux_S1(
-//         .WDATA_M0(WDATA_M0_reg_q),
-//         .WSTRB_M0(WSTRB_M0_reg_q),
-//         .WLAST_M0(WLAST_M0_reg_q),
-//         .WVALID_M0(WVALID_M0_reg_q),
-//         .WDATA_M1(WDATA_M1_reg_q),
-//         .WSTRB_M1(WSTRB_M1_reg_q),
-//         .WLAST_M1(WLAST_M1_reg_q),
-//         .WVALID_M1(WVALID_M1_reg_q),
-//         .gnt(line_grant), // from arbiter
-//         .WDATA(WDATA_S1_reg_d),// to Slave 1
-//         .WSTRB(WSTRB_S1_reg_d),
-//         .WLAST(WLAST_S1_reg_d),
-//         .WVALID(WVALID_S1_reg_d)
-//     );
+    W_mux W_mux_S1(
+        // .WDATA_M0(WDATA_M0_reg_q),
+        // .WSTRB_M0(WSTRB_M0_reg_q),
+        // .WLAST_M0(WLAST_M0_reg_q),
+        // .WVALID_M0(WVALID_M0_reg_q),
+        .WDATA_M1(WDATA_M1),
+        .WSTRB_M1(WSTRB_M1),
+        .WLAST_M1(WLAST_M1),
+        .WVALID_M1(WVALID_M1),
+        .gnt(line_grant), // from arbiter
+        .WDATA(WDATA_S1_temp),// to Slave 1
+        .WSTRB(WSTRB_S1_temp),
+        .WLAST(WLAST_S1_temp),
+        .WVALID(WVALID_S1_temp)
+    );
 
 // 	R_mux R_mux_M0(
 // 		.RID_S1(RID_S1_reg_q),
@@ -463,13 +473,13 @@ always_ff @(posedge ACLK or negedge ARESETn) begin
 
 		//SLAVE INTERFACE FOR MASTERS
 		//WRITE ADDRESS
-		AWVALID_M1_reg_q <= 0;
+		AWREADY_M1_reg_q <= 0;
 
 		//WRITE DATA
-		WDATA_M1_reg_q <= 0;
-		WSTRB_M1_reg_q <= 0;
-		WLAST_M1_reg_q <= 0;
-		WVALID_M1_reg_q <= 0;
+		// WDATA_M1_reg_q <= 0;
+		// WSTRB_M1_reg_q <= 0;
+		// WLAST_M1_reg_q <= 0;
+		// WVALID_M1_reg_q <= 0;
 		WREADY_M1_reg_q <= 0;
 		//WRITE RESPONSE
 		BID_M1_reg_q <= 0;
@@ -521,7 +531,7 @@ always_ff @(posedge ACLK or negedge ARESETn) begin
 		WSTRB_S0_reg_q <= 0;
 		WLAST_S0_reg_q <= 0;
 		WVALID_S0_reg_q <= 0;
-		WREADY_S0_reg_q <= 0;
+		// WREADY_S0_reg_q <= 0;
 		//WRITE RESPONSE0
 		BID_S0_reg_q <= 0;
 		BRESP_S0_reg_q <= 0;
@@ -540,7 +550,7 @@ always_ff @(posedge ACLK or negedge ARESETn) begin
 		WSTRB_S1_reg_q <= 0;
 		WLAST_S1_reg_q <= 0;
 		WVALID_S1_reg_q <= 0;
-		WREADY_S1_reg_q <= 0;
+		// WREADY_S1_reg_q <= 0;
 		//WRITE RESPONSE1
 		BID_S1_reg_q <= 0;
 		BRESP_S1_reg_q <= 0;
@@ -756,5 +766,70 @@ always_comb begin
     end
 end
 
+
+//AW channel
+always_comb begin
+    unique if(WREADY_S0 == 0 && WVALID_S0 == 1) begin
+		WDATA_S0_reg_d = WDATA_S0_reg_q;
+		WSTRB_S0_reg_d = WSTRB_S0_reg_q;
+		WLAST_S0_reg_d = WLAST_S0_reg_q;
+		WVALID_S0_reg_d = WVALID_S0_reg_q;
+    end
+    else begin
+        WDATA_S0_reg_d = WDATA_S0_temp
+		WSTRB_S0_reg_d = WSTRB_S0_temp
+		WLAST_S0_reg_d = WLAST_S0_temp
+		WVALID_S0_reg_d = WVALID_S0_temp
+    end
+end
+
+always_comb begin
+    unique if(WREADY_S1 == 0 && WVALID_S1 == 1) begin
+        WDATA_S1_reg_d = WDATA_S1_reg_q;
+		WSTRB_S1_reg_d = WSTRB_S1_reg_q;
+		WLAST_S1_reg_d = WLAST_S1_reg_q;
+		WVALID_S1_reg_d = WVALID_S1_reg_q;
+    end
+    else begin
+        WDATA_S1_reg_d = WDATA_S1_temp
+		WSTRB_S1_reg_d = WSTRB_S1_temp
+		WLAST_S1_reg_d = WLAST_S1_temp
+		WVALID_S1_reg_d = WVALID_S1_temp
+    end
+end
+
+always_comb begin
+    unique if(WREADY_S1 == 1 && WVALID_S1 == 1) begin
+        WREADY_M1_reg_d = WREADY_S1;
+    end
+    else if(AWREADY_S0 == 1 && AWVALID_S0 == 1) begin
+        WREADY_M1_reg_d = WREADY_S0;
+    end
+    else begin
+        WREADY_M1_reg_d = 0; 
+    end
+end
+
+
+assign BREADY_S0_reg_d = BREADY_M1;
+assign BREADY_S1_reg_d = BREADY_M1;
+
+always_comb begin
+    unique if(BVALID_S0 == 1 && BREADY_S0 == 1) begin
+        BID_M1_reg_d = BID_S0[3:0];
+        BRESP_M1_reg_d = BRESP_S0;
+        BVALID_M1_reg_d = BVALID_S0;
+    end
+    else if (BVALID_S1 == 1 && BREADY_S1 == 1)begin
+        BID_M1_reg_d = BID_S0[3:0];
+        BRESP_M1_reg_d = BRESP_S0;
+        BVALID_M1_reg_d = BVALID_S0;
+    end
+    else begin
+        BID_M1_reg_d = BID_S0_reg_q;
+        BRESP_M1_reg_d = BRESP_S0_reg_q;
+        BVALID_M1_reg_d = BVALID_S0_reg_q;
+    end
+end
 
 endmodule
