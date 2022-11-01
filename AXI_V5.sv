@@ -163,12 +163,12 @@ module AXI(
 	// logic BREADY_M1_reg_d, BREADY_M1_reg_q;
 
 	//READ ADDRESS0
-	// logic [`AXI_ID_BITS-1:0] ARID_M0_reg_d, ARID_M0_reg_q;
-	// logic [`AXI_ADDR_BITS-1:0] ARADDR_M0_reg_d, ARADDR_M0_reg_q;
-	// logic [`AXI_LEN_BITS-1:0] ARLEN_M0_reg_d, ARLEN_M0_reg_q;
-	// logic [`AXI_SIZE_BITS-1:0] ARSIZE_M0_reg_d, ARSIZE_M0_reg_q;
-	// logic [1:0] ARBURST_M0_reg_d, ARBURST_M0_reg_q;
-	// logic ARVALID_M0_reg_d, ARVALID_M0_reg_q;
+	logic [`AXI_ID_BITS-1:0] ARID_M0_reg_d, ARID_M0_reg_q;
+	logic [`AXI_ADDR_BITS-1:0] ARADDR_M0_reg_d, ARADDR_M0_reg_q;
+	logic [`AXI_LEN_BITS-1:0] ARLEN_M0_reg_d, ARLEN_M0_reg_q;
+	logic [`AXI_SIZE_BITS-1:0] ARSIZE_M0_reg_d, ARSIZE_M0_reg_q;
+	logic [1:0] ARBURST_M0_reg_d, ARBURST_M0_reg_q;
+	logic ARVALID_M0_reg_d, ARVALID_M0_reg_q;
 	logic ARREADY_M0_reg_d, ARREADY_M0_reg_q;
 	//READ DATA0
 	logic [`AXI_ID_BITS-1:0] RID_M0_reg_d, RID_M0_reg_q;
@@ -336,67 +336,58 @@ module AXI(
         .AWVALID_S1(AWVALID_S1_temp)
     );
 
-    // assign BID_S0_temp = BID_S0;
-    // assign BRESP_S0_temp = BRESP_S0;
-    // assign BVALID_S0_temp = BVALID_S0;
-    // assign BREADY_S0_reg_d = BREADY_M1;
-    // assign BID_S1_temp = BID_S1;
-    // assign BRESP_S1_temp = BRESP_S1;
-    // assign BVALID_S1_temp = BVALID_S1;
-    // assign BREADY_S1_reg_d = BREADY_M1;
 
-
-// //AR
-//     logic [`AXI_ID_BITS-1:0] ARID_mux2dec;
-// 	logic [`AXI_ADDR_BITS-1:0] ARADDR_mux2dec;
-// 	logic [`AXI_LEN_BITS-1:0] ARLEN_mux2dec;
-// 	logic [`AXI_SIZE_BITS-1:0] ARSIZE_mux2dec;
-// 	logic [1:0] ARBURST_mux2dec;
-// 	logic ARVALID_mux2dec;
-//     AR_mux Ar_mux(
-//         .ARID_M0(ARID_M0_reg_q),
-//         .ARADDR_M0(ARADDR_M0_reg_q),
-//         .ARLEN_M0(ARLEN_M0_reg_q),
-//         .ARSIZE_M0(ARSIZE_M0_reg_q),
-//         .ARBURST_M0(ARBURST_M0_reg_q),
-//         .ARVALID_M0(ARVALID_M0_reg_q),
-//         .ARID_M1(ARID_M1_reg_q),
-//         .ARADDR_M1(ARADDR_M1_reg_q),
-//         .ARLEN_M1(ARLEN_M1_reg_q),
-//         .ARSIZE_M1(ARSIZE_M1_reg_q),
-//         .ARBURST_M1(ARBURST_M1_reg_q),
-//         .ARVALID_M1(ARVALID_M1_reg_q),
-//         .gnt(line_grant), // from arbiter
-//         .ARID(ARID_mux2dec), // to decoder
-//         .ARADDR(ARADDR_mux2dec),
-//         .ARLEN(ARLEN_mux2dec),
-//         .ARSIZE(ARSIZE_mux2dec),
-//         .ARBURST(ARBURST_mux2dec),
-//         .ARVALID(ARVALID_mux2dec)
-//     );
-//     AR_decoder AR_decoder(
-//         .ARID(ARID_mux2dec), 
-//         .ARADDR(ARADDR_mux2dec),
-//         .ARLEN(ARLEN_mux2dec),
-//         .ARSIZE(ARSIZE_mux2dec),
-//         .ARBURST(ARBURST_mux2dec),
-//         .ARVALID(ARVALID_mux2dec),
-//         .ARID_S0(ARID_S0_reg_q),
-//         .ARADDR_S0(ARADDR_S0_reg_q),
-//         .ARLEN_S0(ARLEN_S0_reg_q),
-//         .ARSIZE_S0(ARSIZE_S0_reg_q),
-//         .ARBURST_S0(ARBURST_S0_reg_q),
-//         .ARVALID_S0(ARVALID_S0_reg_q),
-//         .ARID_S1(ARID_S1_reg_q),
-//         .ARADDR_S1(ARADDR_S1_reg_q),
-//         .ARLEN_S1(ARLEN_S1_reg_q),
-//         .ARSIZE_S1(ARSIZE_S1_reg_q),
-//         .ARBURST_S1(ARBURST_S1_reg_q),
-//         .ARVALID_S1(ARVALID_S1_reg_q)
-//     );
+//AR
+    logic [`AXI_ID_BITS-1:0] ARID_mux2dec;
+	logic [`AXI_ADDR_BITS-1:0] ARADDR_mux2dec;
+	logic [`AXI_LEN_BITS-1:0] ARLEN_mux2dec;
+	logic [`AXI_SIZE_BITS-1:0] ARSIZE_mux2dec;
+	logic [1:0] ARBURST_mux2dec;
+	logic ARVALID_mux2dec;
+    AR_mux Ar_mux(
+        .ARID_M0(ARID_M0_reg_q),
+        .ARADDR_M0(ARADDR_M0_reg_q),
+        .ARLEN_M0(ARLEN_M0_reg_q),
+        .ARSIZE_M0(ARSIZE_M0_reg_q),
+        .ARBURST_M0(ARBURST_M0_reg_q),
+        .ARVALID_M0(ARVALID_M0_reg_q),
+        .ARID_M1(ARID_M1_reg_q),
+        .ARADDR_M1(ARADDR_M1_reg_q),
+        .ARLEN_M1(ARLEN_M1_reg_q),
+        .ARSIZE_M1(ARSIZE_M1_reg_q),
+        .ARBURST_M1(ARBURST_M1_reg_q),
+        .ARVALID_M1(ARVALID_M1_reg_q),
+        .gnt(line_grant), // from arbiter
+        .ARID(ARID_mux2dec), // to decoder
+        .ARADDR(ARADDR_mux2dec),
+        .ARLEN(ARLEN_mux2dec),
+        .ARSIZE(ARSIZE_mux2dec),
+        .ARBURST(ARBURST_mux2dec),
+        .ARVALID(ARVALID_mux2dec)
+    );
+    AR_decoder AR_decoder(
+        .ARID(ARID_mux2dec), 
+        .ARADDR(ARADDR_mux2dec),
+        .ARLEN(ARLEN_mux2dec),
+        .ARSIZE(ARSIZE_mux2dec),
+        .ARBURST(ARBURST_mux2dec),
+        .ARVALID(ARVALID_mux2dec),
+        .ARID_S0(ARID_S0_reg_d),
+        .ARADDR_S0(ARADDR_S0_reg_d),
+        .ARLEN_S0(ARLEN_S0_reg_d),
+        .ARSIZE_S0(ARSIZE_S0_reg_d),
+        .ARBURST_S0(ARBURST_S0_reg_d),
+        .ARVALID_S0(ARVALID_S0_reg_d),
+        .ARID_S1(ARID_S1_reg_d),
+        .ARADDR_S1(ARADDR_S1_reg_d),
+        .ARLEN_S1(ARLEN_S1_reg_d),
+        .ARSIZE_S1(ARSIZE_S1_reg_d),
+        .ARBURST_S1(ARBURST_S1_reg_d),
+        .ARVALID_S1(ARVALID_S1_reg_d)
+    );
 
 // Write Data
-    W_mux W_mux_S0(
+     W_mux W_mux_S0(
         // .WDATA_M0(WDATA_M0_reg_q),
         // .WSTRB_M0(WSTRB_M0_reg_q),
         // .WLAST_M0(WLAST_M0_reg_q),
@@ -428,48 +419,48 @@ module AXI(
         .WVALID(WVALID_S1_temp)
     );
 
-// 	R_mux R_mux_M0(
-// 		.RID_S1(RID_S1_reg_q),
-// 		.RDATA_S1(RDATA_S1_reg_q),
-// 		.RRESP_S1(RRESP_S1_reg_q),
-// 		.RLAST_S1(RLAST_S1_reg_q),
-// 		.RVALID_S1(RVALID_S1_reg_q),
-// 		.RID_S0(RID_S0_reg_q),
-// 		.RDATA_S0(RDATA_S0_reg_q),
-// 		.RRESP_S0(RRESP_S0_reg_q),
-// 		.RLAST_S0(RLAST_S0_reg_q),
-// 		.RVALID_S0(RVALID_S0_reg_q),
-// 		.RID(RID_M0_reg_d),
-// 		.RDATA(RDATA_M0_reg_d),
-// 		.RRESP(RRESP_M0_reg_d),
-// 		.RLAST(RLAST_M0_reg_d),
-// 		.RVALID(RVALID_M0_reg_d)
-// 	);
+	R_mux R_mux_M0(
+		.RID_S1(RID_S1_reg_q),
+		.RDATA_S1(RDATA_S1_reg_q),
+		.RRESP_S1(RRESP_S1_reg_q),
+		.RLAST_S1(RLAST_S1_reg_q),
+		.RVALID_S1(RVALID_S1_reg_q),
+		.RID_S0(RID_S0_reg_q),
+		.RDATA_S0(RDATA_S0_reg_q),
+		.RRESP_S0(RRESP_S0_reg_q),
+		.RLAST_S0(RLAST_S0_reg_q),
+		.RVALID_S0(RVALID_S0_reg_q),
+		.RID(RID_M0_reg_d),
+		.RDATA(RDATA_M0_reg_d),
+		.RRESP(RRESP_M0_reg_d),
+		.RLAST(RLAST_M0_reg_d),
+		.RVALID(RVALID_M0_reg_d)
+	);
 
-// 	R_mux R_mux_M1(
-// 		.RID_S1(RID_S1_reg_q),
-// 		.RDATA_S1(RDATA_S1_reg_q),
-// 		.RRESP_S1(RRESP_S1_reg_q),
-// 		.RLAST_S1(RLAST_S1_reg_q),
-// 		.RVALID_S1(RVALID_S1_reg_q),
-// 		.RID_S0(RID_S0_reg_q),
-// 		.RDATA_S0(RDATA_S0_reg_q),
-// 		.RRESP_S0(RRESP_S0_reg_q),
-// 		.RLAST_S0(RLAST_S0_reg_q),
-// 		.RVALID_S0(RVALID_S0_reg_q),
-// 		.RID(RID_M1_reg_d),
-// 		.RDATA(RDATA_M1_reg_d),
-// 		.RRESP(RRESP_M1_reg_d),
-// 		.RLAST(RLAST_M1_reg_d),
-// 		.RVALID(RVALID_M1_reg_d)
-// 	);
+	R_mux R_mux_M1(
+		.RID_S1(RID_S1_reg_q),
+		.RDATA_S1(RDATA_S1_reg_q),
+		.RRESP_S1(RRESP_S1_reg_q),
+		.RLAST_S1(RLAST_S1_reg_q),
+		.RVALID_S1(RVALID_S1_reg_q),
+		.RID_S0(RID_S0_reg_q),
+		.RDATA_S0(RDATA_S0_reg_q),
+		.RRESP_S0(RRESP_S0_reg_q),
+		.RLAST_S0(RLAST_S0_reg_q),
+		.RVALID_S0(RVALID_S0_reg_q),
+		.RID(RID_M1_reg_d),
+		.RDATA(RDATA_M1_reg_d),
+		.RRESP(RRESP_M1_reg_d),
+		.RLAST(RLAST_M1_reg_d),
+		.RVALID(RVALID_M1_reg_d)
+	);
 
-assign 
+
 
 
 always_ff @(posedge ACLK or negedge ARESETn) begin
 	if(!ARESETn) begin
-		REQUEST_reg_q <= 0;
+		//REQUEST_reg_q <= 0;
 
 		//SLAVE INTERFACE FOR MASTERS
 		//WRITE ADDRESS
@@ -525,6 +516,7 @@ always_ff @(posedge ACLK or negedge ARESETn) begin
 		AWLEN_S0_reg_q <= 0;
 		AWSIZE_S0_reg_q <= 0;
 		AWBURST_S0_reg_q <= 0;
+		AWVALID_S0_reg_q <= 0;
 
 		//WRITE DATA0
 		WDATA_S0_reg_q <= 0;
@@ -533,10 +525,10 @@ always_ff @(posedge ACLK or negedge ARESETn) begin
 		WVALID_S0_reg_q <= 0;
 		// WREADY_S0_reg_q <= 0;
 		//WRITE RESPONSE0
-		// BID_S0_reg_q <= 0;
-		// BRESP_S0_reg_q <= 0;
-		// BVALID_S0_reg_q <= 0;
-		BREADY_S0_reg_q <= 0;
+		BID_S0_reg_q <= 0;
+		BRESP_S0_reg_q <= 0;
+		BVALID_S0_reg_q <= 0;
+		// BREADY_S0_reg_q <= 0;
 		
 		//WRITE ADDRESS1
         AWID_S1_reg_q <= 0;
@@ -590,7 +582,7 @@ always_ff @(posedge ACLK or negedge ARESETn) begin
 	end
 
 	else begin
-		REQUEST_reg_q <= REQUEST_reg_d;
+		//REQUEST_reg_q <= REQUEST_reg_d;
 
 		//SLAVE INTERFACE FOR MASTERS
 		//WRITE ADDRESS
@@ -647,7 +639,13 @@ always_ff @(posedge ACLK or negedge ARESETn) begin
 
 		//MASTER INTERFACE FOR SLAVES
 		//WRITE ADDRESS0
-		AWREADY_S0_reg_q <= AWREADY_S0_reg_d;
+		AWID_S0_reg_q <= AWID_S0_reg_d;
+		AWADDR_S0_reg_q <= AWADDR_S0_reg_d;
+		AWLEN_S0_reg_q <= AWLEN_S0_reg_d;
+		AWSIZE_S0_reg_q <= AWSIZE_S0_reg_d;
+		AWBURST_S0_reg_q <= AWBURST_S0_reg_d;
+		AWVALID_S0_reg_q <= AWVALID_S0_reg_d;
+		//AWREADY_S0_reg_q <= AWREADY_S0_reg_d;
 
 		//WRITE DATA0
 		WDATA_S0_reg_q <= WDATA_S0_reg_d;
@@ -656,13 +654,19 @@ always_ff @(posedge ACLK or negedge ARESETn) begin
 		WVALID_S0_reg_q <= WVALID_S0_reg_d;
 		// WREADY_S0_reg_q <= WREADY_S0_reg_d;
 		//WRITE RESPONSE0
-		// BID_S0_reg_q <= BID_S0_reg_d;
-		// BRESP_S0_reg_q <= BRESP_S0_reg_d;
-		// BVALID_S0_reg_q <= BVALID_S0_reg_d;
-		BREADY_S0_reg_q <= BREADY_S0_reg_d;
+		BID_S0_reg_q <= BID_S0_reg_d;
+		BRESP_S0_reg_q <= BRESP_S0_reg_d;
+		BVALID_S0_reg_q <= BVALID_S0_reg_d;
+		// BREADY_S0_reg_q <= BREADY_S0_reg_d;
 		
 		//WRITE ADDRESS1
-		AWREADY_S1_reg_q <= AWREADY_S1_reg_d;
+		AWID_S1_reg_q <= AWID_S1_reg_d;
+		AWADDR_S1_reg_q <= AWADDR_S1_reg_d;
+		AWLEN_S1_reg_q <= AWLEN_S1_reg_d;
+		AWSIZE_S1_reg_q <= AWSIZE_S1_reg_d;
+		AWBURST_S1_reg_q <= AWBURST_S1_reg_d;
+		AWVALID_S1_reg_q <= AWVALID_S1_reg_d;
+		//AWREADY_S1_reg_q <= AWREADY_S1_reg_d;
 
 		//WRITE DATA1
 		WDATA_S1_reg_q <= WDATA_S1_reg_d;
@@ -671,10 +675,10 @@ always_ff @(posedge ACLK or negedge ARESETn) begin
 		WVALID_S1_reg_q <= WVALID_S1_reg_d;
 		// WREADY_S1_reg_q <= WREADY_S1_reg_d;
 		//WRITE RESPONSE1
-		// BID_S1_reg_q <= BID_S1_reg_d;
-		// BRESP_S1_reg_q <= BRESP_S1_reg_d;
-		// BVALID_S1_reg_q <= BVALID_S1_reg_d;
-		BREADY_S1_reg_q <= BREADY_S1_reg_d;
+		BID_S1_reg_q <= BID_S1_reg_d;
+		BRESP_S1_reg_q <= BRESP_S1_reg_d;
+		BVALID_S1_reg_q <= BVALID_S1_reg_d;
+		//BREADY_S1_reg_q <= BREADY_S1_reg_d;
 		
 		//READ ADDRESS0
 		ARID_S0_reg_q <= ARID_S0_reg_d;
@@ -832,5 +836,157 @@ always_comb begin
         BVALID_M1_reg_d = BVALID_S0_reg_q;
     end
 end
+
+
+
+assign ARID_M0_reg_d = ARID_M0;
+assign ARADDR_M0_reg_d = ARADDR_M0;
+assign ARLEN_M0_reg_d = ARLEN_M0;
+assign ARSIZE_M0_reg_d = ARSIZE_M0;
+assign ARBURST_M0_reg_d = ARBURST_M0;
+assign ARVALID_M0_reg_d = ARVALID_M0;
+
+assign ARID_M1_reg_d = ARID_M1;
+assign ARADDR_M1_reg_d = ARADDR_M1;
+assign ARLEN_M1_reg_d = ARLEN_M1;
+assign ARSIZE_M1_reg_d = ARSIZE_M1;
+assign ARBURST_M1_reg_d = ARBURST_M1;
+assign ARVALID_M1_reg_d = ARVALID_M1;
+
+assign ARVALID_S0 = ARVALID_S0_reg_q;
+assign ARVALID_S1 = ARVALID_S1_reg_q;
+
+assign ARREADY_S0_reg_d = ARREADY_S0;
+assign ARREADY_S1_reg_d = ARREADY_S1;
+
+assign ARREADY_M1 = ARREADY_M1_reg_q;
+assign ARREADY_M0 = ARREADY_M0_reg_q;
+///////////////////change
+
+
+
+/////////////////////////
+always_comb begin
+	unique if(ARVALID_S0 == 1 && ARREADY_S0 == 1)begin
+		ARID_S0 = ARID_S0_reg_q;
+		ARADDR_S0 = ARADDR_S0_reg_q;
+		ARLEN_S0 = ARLEN_S0_reg_q;
+		ARSIZE_S0 = ARSIZE_S0_reg_q;
+		ARBURST_S0 = ARBURST_S0_reg_q;
+		ARID_S1 = 0;
+		ARADDR_S1 = 0;
+		ARLEN_S1 = 0;
+		ARSIZE_S1 = 0;
+		ARBURST_S1 = 0;
+		if(ARID_S0[5] == 1) begin
+			ARREADY_M1_reg_d = ARREADY_S0_reg_q;
+			ARREADY_M0_reg_d = 0;
+		end
+		else begin
+			ARREADY_M1_reg_d = ARREADY_S0_reg_q;
+			ARREADY_M0_reg_d = 0;
+		end
+	end
+	else if(ARVALID_S1 == 1 && ARREADY_S1 == 1)begin
+		ARID_S1 = ARID_S1_reg_q;
+		ARADDR_S1 = ARADDR_S1_reg_q;
+		ARLEN_S1 = ARLEN_S1_reg_q;
+		ARSIZE_S1 = ARSIZE_S1_reg_q;
+		ARBURST_S1 = ARBURST_S1_reg_q;
+		ARID_S0 = 0;
+		ARADDR_S0 = 0;
+		ARLEN_S0 = 0;
+		ARSIZE_S0 = 0;
+		ARBURST_S0 = 0;
+		if(ARID_S1[5] == 1) begin
+			ARREADY_M1_reg_d = ARREADY_S1_reg_q;
+			ARREADY_M0_reg_d = 0;
+		end
+		else begin
+			ARREADY_M1_reg_d = ARREADY_S1_reg_q;
+			ARREADY_M0_reg_d = 0;
+		end
+	end
+	else begin
+		ARID_S0 = 0;
+		ARADDR_S0 = 0;
+		ARLEN_S0 = 0;
+		ARSIZE_S0 = 0;
+		ARBURST_S0 = 0;
+		ARID_S1 = 0;
+		ARADDR_S1 = 0;
+		ARLEN_S1 = 0;
+		ARSIZE_S1 = 0;
+		ARBURST_S1 = 0;
+		ARREADY_M0_reg_d = 0;
+		ARREADY_M1_reg_d = 0;
+	end
+end
+
+assign RID_M0 = RID_M0_reg_q;
+assign RDATA_M0 = RDATA_M0_reg_q;
+assign RRESP_M0 = RRESP_M0_reg_q;
+assign RLAST_M0 = RLAST_M0_reg_q;
+assign RVALID_M0 = RVALID_M0_reg_q;
+assign RID_M1 = RID_M1_reg_q;
+assign RDATA_M1 = RDATA_M1_reg_q;
+assign RRESP_M1 = RRESP_M1_reg_q;
+assign RLAST_M1 = RLAST_M1_reg_q;
+assign RVALID_M1 = RVALID_M1_reg_q;
+
+assign RREADY_M0_reg_d = RREADY_M0;
+assign RREADY_M1_reg_d = RREADY_M1;
+
+always_comb begin
+	unique if(RREADY_M0 == 1) begin
+		RREADY_S0_reg_d = RREADY_M0_reg_q;
+		RREADY_S1_reg_d = RREADY_M0_reg_q;
+	end
+	else if(RREADY_M1 == 1) begin
+		RREADY_S0_reg_d = RREADY_M1_reg_q;
+		RREADY_S1_reg_d = RREADY_M1_reg_q;
+	end
+	else begin
+		RREADY_S0_reg_d = 0;
+		RREADY_S1_reg_d = 0;
+	end
+end
+
+always_comb begin
+	if(RVALID_S0 == 1 && RREADY_S0 == 1) begin
+		RID_S0_reg_d = RID_S0;
+		RDATA_S0_reg_d = RDATA_S0;
+		RRESP_S0_reg_d = RRESP_S0;
+		RLAST_S0_reg_d = RLAST_S0;
+		RVALID_S0_reg_d = RVALID_S0;
+	end
+	else begin
+		RID_S0_reg_d = 0;
+		RDATA_S0_reg_d = 0;
+		RRESP_S0_reg_d = 0;
+		RLAST_S0_reg_d = 0;
+		RVALID_S0_reg_d = 0;
+	end
+end
+
+always_comb begin
+	if(RVALID_S1 == 1 && RREADY_S1 == 1) begin
+		RID_S1_reg_d = RID_S1;
+		RDATA_S1_reg_d = RDATA_S1;
+		RRESP_S1_reg_d = RRESP_S1;
+		RLAST_S1_reg_d = RLAST_S1;
+		RVALID_S1_reg_d = RVALID_S1;
+	end
+	else begin
+		RID_S1_reg_d = 0;
+		RDATA_S1_reg_d = 0;
+		RRESP_S1_reg_d = 0;
+		RLAST_S1_reg_d = 0;
+		RVALID_S1_reg_d = 0;
+	end
+end
+
+
+
 
 endmodule
