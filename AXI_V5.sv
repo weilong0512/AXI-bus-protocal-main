@@ -751,8 +751,9 @@ always_comb begin
     else if(AWREADY_S0 == 1 && AWVALID_S0 == 1) begin
         AWREADY_M1_reg_d = AWREADY_S0;
     end
-    else
-        AWREADY_M1_reg_d = 0;
+    else begin
+        AWREADY_M1_reg_d = 0; 
+    end
 end
 
 
