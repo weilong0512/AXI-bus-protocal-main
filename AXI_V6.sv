@@ -17,8 +17,6 @@ module AXI(
 
 	input ACLK,
 	input ARESETn,
-	input [1:0] REQUEST,
-	output [1:0] cpu_gnt,
 
 	//SLAVE INTERFACE FOR MASTERS
 	//WRITE ADDRESS
