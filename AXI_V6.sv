@@ -216,7 +216,7 @@ always_ff @(posedge ACLK or negedge ARESETn) begin
         aw_buf.burst <= 2'd0;
     end else begin
         // read in data when handshaking
-        if (((abt_s == M0_TOP && !m0_arhs)  || abt_s == M1_TOP ) && m1_whs) begin
+        if ((abt_s == M0_TOP  || abt_s == M1_TOP ) && !m0_arhs && m1_awhs) begin
             aw_buf.id    <= { 4'd1, AWID_M1 };
             aw_buf.addr  <= AWADDR_M1;
             aw_buf.len   <= AWLEN_M1;
@@ -278,14 +278,14 @@ always_comb begin : w_decoder
     WVALID_S0 = 1'b0;
     WVALID_S1 = 1'b0;
 
-    unique if (w_buf.addr >= 32'h0002_0000) begin
+    unique if (aw_buf.addr >= 32'h0002_0000) begin
         // dec err
         WVALID_S0 = 1'b0;
         WVALID_S1 = 1'b0;
-    end else if (w_buf.addr >= 32'h0001_0000 && w_buf.addr < 32'h0002_0000) begin
+    end else if (aw_buf.addr >= 32'h0001_0000 && aw_buf.addr < 32'h0002_0000) begin
         WVALID_S1 = 1'b1;
         WVALID_S0 = 1'b0;
-    end else if (w_buf.addr < 32'h0001_0000) begin
+    end else if (aw_buf.addr < 32'h0001_0000) begin
         WVALID_S0 = 1'b0;
         WVALID_S1 = 1'b1;
     end
