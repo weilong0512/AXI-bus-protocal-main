@@ -173,7 +173,7 @@ enum logic[4:0] {
     M0_VALID_R,
     M1_VALID_R,
     M1_VALID_W,
-    S0_RREADT,
+    S0_RREADY,
     S1_RREADY,
     S0_WREADY,
     S1_WREADY,
@@ -206,6 +206,18 @@ assign AWLEN_S1   = aw_buf.len;
 assign AWSIZE_S1  = aw_buf.size;
 assign AWBURST_S1 = aw_buf.burst;
 
+
+assign AWREADY_M1 = ((abt_s == M0_TOP) || (abt_s == M1_TOP));
+assign ARREADY_M1 = ((abt_s == M0_TOP) || (abt_s == M1_TOP));
+assign ARREADY_M0 = ((abt_s == M0_TOP) || (abt_s == M1_TOP));
+assign WREADY_M1 = ((abt_s == S0_WREADY) ||(abt_s == S1_WREADY));
+
+assign RREADY_S0 = (abt_s == S0_RREADY);
+assign RREADY_S1 = (abt_s == S1_RREADY);
+assign BREADY_S0 = (abt_s == S0_BREADY);
+assign BREADY_S1 = (abt_s == S1_BREADY);
+
+
 //aw hs and pass data in
 always_ff @(posedge ACLK or negedge ARESETn) begin
     if (!ARESETn) begin
@@ -216,7 +228,7 @@ always_ff @(posedge ACLK or negedge ARESETn) begin
         aw_buf.burst <= 2'd0;
     end else begin
         // read in data when handshaking
-        if ((abt_s == M0_TOP  || abt_s == M1_TOP ) && !m0_arhs && m1_awhs) begin
+        if (((abt_s == M0_TOP && !m0_arhs) || abt_s == M1_TOP ) && m1_awhs) begin
             aw_buf.id    <= { 4'd1, AWID_M1 };
             aw_buf.addr  <= AWADDR_M1;
             aw_buf.len   <= AWLEN_M1;
@@ -227,21 +239,24 @@ always_ff @(posedge ACLK or negedge ARESETn) begin
 end
 
 always_comb begin : aw_decoder
-    AWVALID_S0 = 1'b0;
-    AWVALID_S1 = 1'b0;
 
-    unique if (aw_buf.addr >= 32'h0002_0000) begin
-        // dec err
-        AWVALID_S0 = 1'b0;
-        AWVALID_S1 = 1'b0;
-    end else if (aw_buf.addr >= 32'h0001_0000 && aw_buf.addr < 32'h0002_0000) begin
-        AWVALID_S1 = 1'b1;
-        AWVALID_S0 = 1'b0;
-    end else if (aw_buf.addr < 32'h0001_0000) begin
-        AWVALID_S0 = 1'b0;
-        AWVALID_S1 = 1'b1;
+	AWVALID_S0 = 1'b0;
+	AWVALID_S1 = 1'b0;
+    if(abt_s == M1_VALID_W) begin
+        unique if (aw_buf.addr >= 32'h0002_0000) begin
+            // dec err
+            AWVALID_S0 = 1'b0;
+            AWVALID_S1 = 1'b0;
+        end else if (aw_buf.addr >= 32'h0001_0000 && aw_buf.addr < 32'h0002_0000) begin
+            AWVALID_S1 = 1'b1;
+            AWVALID_S0 = 1'b0;
+        end else if (aw_buf.addr < 32'h0001_0000) begin
+            AWVALID_S0 = 1'b0;
+            AWVALID_S1 = 1'b1;
+        end
     end
 end
+
 
 
 struct packed {
@@ -277,19 +292,23 @@ end
 always_comb begin : w_decoder
     WVALID_S0 = 1'b0;
     WVALID_S1 = 1'b0;
-
-    unique if (aw_buf.addr >= 32'h0002_0000) begin
-        // dec err
-        WVALID_S0 = 1'b0;
-        WVALID_S1 = 1'b0;
-    end else if (aw_buf.addr >= 32'h0001_0000 && aw_buf.addr < 32'h0002_0000) begin
-        WVALID_S1 = 1'b1;
-        WVALID_S0 = 1'b0;
-    end else if (aw_buf.addr < 32'h0001_0000) begin
-        WVALID_S0 = 1'b0;
-        WVALID_S1 = 1'b1;
+    if(abt_s == S0_WVALID || abt_s == S1_WVALID) begin
+        unique if (aw_buf.addr >= 32'h0002_0000) begin
+            // dec err
+            WVALID_S0 = 1'b0;
+            WVALID_S1 = 1'b0;
+        end else if (aw_buf.addr >= 32'h0001_0000 && aw_buf.addr < 32'h0002_0000) begin
+            WVALID_S1 = 1'b1;
+            WVALID_S0 = 1'b0;
+        end else if (aw_buf.addr < 32'h0001_0000) begin
+            WVALID_S0 = 1'b0;
+            WVALID_S1 = 1'b1;
+        end
     end
 end
+
+
+
 
 
 struct packed {
@@ -397,19 +416,20 @@ always_ff @(posedge ACLK or negedge ARESETn) begin
 end
 
 always_comb begin : ar_decoder
-    ARVALID_S0 = 1'b0;
+	ARVALID_S0 = 1'b0;
     ARVALID_S1 = 1'b0;
-
-    unique if (ar_buf.addr >= 32'h0002_0000) begin
-        // dec err
-        ARVALID_S0 = 1'b0;
-        ARVALID_S1 = 1'b0;
-    end else if (ar_buf.addr >= 32'h0001_0000 && ar_buf.addr < 32'h0002_0000) begin
-        ARVALID_S1 = 1'b1;
-        ARVALID_S0 = 1'b0;
-    end else if (ar_buf.addr < 32'h0001_0000) begin
-        ARVALID_S0 = 1'b0;
-        ARVALID_S1 = 1'b1;
+    if(abt_s == M1_VALID_R || abt_s == M0_VALID_R) begin
+        unique if (ar_buf.addr >= 32'h0002_0000) begin
+            // dec err
+            ARVALID_S0 = 1'b0;
+            ARVALID_S1 = 1'b0;
+        end else if (ar_buf.addr >= 32'h0001_0000 && ar_buf.addr < 32'h0002_0000) begin
+            ARVALID_S1 = 1'b1;
+            ARVALID_S0 = 1'b0;
+        end else if (ar_buf.addr < 32'h0001_0000) begin
+            ARVALID_S0 = 1'b0;
+            ARVALID_S1 = 1'b1;
+        end
     end
 end
 
@@ -427,10 +447,12 @@ assign RID_M0   = r_buf0.id[3:0];
 assign RDATA_M0 = r_buf0.data;
 assign RRESP_M0 = r_buf0.resp;
 assign RLAST_M0 = r_buf0.last;
+assign RVALID_M0 = r_buf0.valid;
 assign RID_M1   = r_buf1.id[3:0];
 assign RDATA_M1 = r_buf1.data;
 assign RRESP_M1 = r_buf1.resp;
 assign RLAST_M1 = r_buf1.last;
+assign RVALID_M1 = r_buf1.valid;
 
 // R is valid when state goes to RVALID state
 
@@ -482,7 +504,7 @@ always_ff @(posedge ACLK or negedge ARESETn) begin
                         r_buf0.id    <= RID_S1[3:0];
                         r_buf0.data  <= RDATA_S1;
                         r_buf0.resp  <= RRESP_S1;
-                        r_buf0.last  <= RLAST_S1S1;
+                        r_buf0.last  <= RLAST_S1;
                     end
                     4'b0001: begin
                         r_buf1.valid <= 1'b1;
@@ -521,6 +543,13 @@ always_ff @(posedge ACLK or negedge ARESETn) begin
     end
 end
 
+always_ff@(posedge ACLK, negedge ARESETn) begin
+	if(!ARESETn) begin
+		abt_s <= M0_TOP;
+	end else begin
+		abt_s <= abt_ns;
+	end
+end
 
 always_comb begin
     unique case(abt_s)
@@ -594,7 +623,7 @@ always_comb begin
             end
         end
 
-        SO_WVALID:begin
+        S0_WVALID:begin
             if(s0_whs) begin
                 if(WLAST_S0) begin
                     abt_ns = S0_BREADY;
