@@ -6,19 +6,19 @@ module AR_decoder(
 	input [1:0] ARBURST,
 	input ARVALID,
     
-    output [`AXI_IDS_BITS+3:0] ARID_S0,
-	output [`AXI_ADDR_BITS-1:0] ARADDR_S0,
-	output [`AXI_LEN_BITS-1:0] ARLEN_S0,
-	output [`AXI_SIZE_BITS-1:0] ARSIZE_S0,
-	output [1:0] ARBURST_S0,
-	output ARVALID_S0,
+    output logic  [`AXI_IDS_BITS+3:0] ARID_S0,
+	output logic  [`AXI_ADDR_BITS-1:0] ARADDR_S0,
+	output logic  [`AXI_LEN_BITS-1:0] ARLEN_S0,
+	output logic  [`AXI_SIZE_BITS-1:0] ARSIZE_S0,
+	output logic  [1:0] ARBURST_S0,
+	output logic  ARVALID_S0,
 
-    output [`AXI_IDS_BITS+3:0] ARID_S1,
-	output [`AXI_ADDR_BITS-1:0] ARADDR_S1,
-	output [`AXI_LEN_BITS-1:0] ARLEN_S1,
-	output [`AXI_SIZE_BITS-1:0] ARSIZE_S1,
-	output [1:0] ARBURST_S1,
-	output ARVALID_S1
+    output logic  [`AXI_IDS_BITS+3:0] ARID_S1,
+	output logic  [`AXI_ADDR_BITS-1:0] ARADDR_S1,
+	output logic  [`AXI_LEN_BITS-1:0] ARLEN_S1,
+	output logic  [`AXI_SIZE_BITS-1:0] ARSIZE_S1,
+	output logic  [1:0] ARBURST_S1,
+	output logic  ARVALID_S1
 );
 
     always_comb begin //broadcast

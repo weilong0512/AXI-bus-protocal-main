@@ -478,6 +478,7 @@ module SRAM_wrapper (
                   RLAST_reg_d = 0;
                 end
             end else begin
+                ARLEN_reg_d = ARLEN_reg_q - 1;
                 Next_Counter = Counter + 1;
                 if (ARADDR_reg_q <= 32'hffff && ARSIZE_reg_q >= 3'b011) begin
                     RRESP_reg_d = 2'b10;

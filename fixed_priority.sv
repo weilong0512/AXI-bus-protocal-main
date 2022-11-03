@@ -1,5 +1,5 @@
 module FIXED_PRI#(
-    parameter REQ_WIDTH = 2;
+    parameter REQ_WIDTH = 2
 )(
     input logic[REQ_WIDTH - 1:0] req,
     output logic[REQ_WIDTH - 1:0] pre_req_out,

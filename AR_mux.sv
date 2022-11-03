@@ -15,12 +15,12 @@ module AR_mux (
 
     input logic gnt,
 
-    output [`AXI_ID_BITS+3:0] ARID,
-	output [`AXI_ADDR_BITS-1:0] ARADDR,
-	output [`AXI_LEN_BITS-1:0] ARLEN,
-	output [`AXI_SIZE_BITS-1:0] ARSIZE,
-	output [1:0] ARBURST,
-	output ARVALID,
+    output logic  [`AXI_ID_BITS+3:0] ARID,
+	output logic  [`AXI_ADDR_BITS-1:0] ARADDR,
+	output logic  [`AXI_LEN_BITS-1:0] ARLEN,
+	output logic  [`AXI_SIZE_BITS-1:0] ARSIZE,
+	output logic  [1:0] ARBURST,
+	output  logic ARVALID
 );
     
     always_comb begin

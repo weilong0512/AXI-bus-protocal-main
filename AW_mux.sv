@@ -15,7 +15,7 @@ module AW_mux (
 
     input logic gnt,
 
-    output [`AXI_ID_BITS+3:0] AWID,
+    output [`AXI_IDS_BITS+3:0] AWID,
 	output [`AXI_ADDR_BITS-1:0] AWADDR,
 	output [`AXI_LEN_BITS-1:0] AWLEN,
 	output [`AXI_SIZE_BITS-1:0] AWSIZE,

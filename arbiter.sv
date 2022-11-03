@@ -6,7 +6,7 @@ module RR_ARBITER #(
     input logic clk,
     input logic rst,
     input [1:0] BRESP, RRESP,
-    input logic AWVALID_M0, AWVALID_M1, ARVALID_M0, ARVALID_M1,
+    input logic AWVALID_S0, AWVALID_S1, ARVALID_S0, ARVALID_S1,
     input logic[REQ_WIDTH - 1:0] req,
     output logic[REQ_WIDTH - 1:0] gnt
 );
@@ -103,21 +103,22 @@ module RR_ARBITER #(
         case (ARBITER_STATE)
             IDLE:begin
                 gnt = 2'b00;
+                en = 0;
                 ARBITER_NEXTSTATE = READY
             end
 
             READY:begin
                 if (req != 0) begin
-                    en = 0;
+                    en = 1;
                     gnt = grant; // en = 0 grant 不會 change
                     case (gnt)
                         2'b01:begin
-                            AWVALID = AWVALID_M0;
-                            ARVALID = ARVALID_M0;
+                            AWVALID = AWVALID_S0;
+                            ARVALID = ARVALID_S0;
                         end 
                         2'b10:begin
-                            AWVALID = AWVALID_M1;
-                            ARVALID = ARVALID_M1;
+                            AWVALID = AWVALID_S1;
+                            ARVALID = ARVALID_S1; 
                         end
                         default: 
                     endcase
@@ -140,9 +141,9 @@ module RR_ARBITER #(
                     ARBITER_NEXTSTATE = READY;
                     en = 1;
                 end
-                // else if(BRESP == 2'b10 && BRESP == 2'b11) begin  這裡處理 第三第四種error 還沒實作進去
-                //     ARBITER_NEXTSTATE = READY;
-                // end
+                else if(BRESP == 2'b10 && BRESP == 2'b11) begin  這裡處理 第三第四種error 還沒實作進去
+                    ARBITER_NEXTSTATE = READY;
+                end
                 else begin
                     ARBITER_NEXTSTATE = WRITE;
                 end
@@ -153,9 +154,9 @@ module RR_ARBITER #(
                     ARBITER_NEXTSTATE = READY;
                     en = 1;
                 end
-                // else if(BRESP == 2'b10 && BRESP == 2'b11) begin 這裡處理 第三第四種error 還沒實作進去
-                //     ARBITER_NEXTSTATE = READY;
-                // end
+                else if(BRESP == 2'b10 && BRESP == 2'b11) begin 這裡處理 第三第四種error 還沒實作進去
+                    ARBITER_NEXTSTATE = READY;
+                end
                 else begin
                     ARBITER_NEXTSTATE = READ;
                 end
