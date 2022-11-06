@@ -5,13 +5,6 @@
 // Version:     1.0 
 //=================================================
 `include "AXI_define.svh"
-`include "AW_mux.sv"
-`include "AR_mux.sv"
-`include "AW_decoder.sv"
-`include "AR_decoder.sv"
-`include "W_mux.sv"
-`include "R_mux.sv"
-`include "RRarbiter.sv"
 
 module AXI(
 
@@ -162,7 +155,7 @@ module AXI(
     assign s0_rhs  = RREADY_S0 & RVALID_S0;
     assign s0_bhs  = BREADY_S0 & BVALID_S0;
     assign s1_arhs = ARREADY_S1 & ARVALID_S1;
-    assign s1_awhs = AWREADY_S1 & ARVALID_S1;
+    assign s1_awhs = AWREADY_S1 & AWVALID_S1;
     assign s1_whs  = WREADY_S1 & WVALID_S1;
     assign s1_rhs  = RREADY_S1 & RVALID_S1;
     assign s1_bhs  = BREADY_S1 & BVALID_S1;
@@ -251,8 +244,8 @@ always_comb begin : aw_decoder
             AWVALID_S1 = 1'b1;
             AWVALID_S0 = 1'b0;
         end else if (aw_buf.addr < 32'h0001_0000) begin
-            AWVALID_S0 = 1'b0;
-            AWVALID_S1 = 1'b1;
+            AWVALID_S1 = 1'b0;
+            AWVALID_S0 = 1'b1;
         end
     end
 end
@@ -301,8 +294,8 @@ always_comb begin : w_decoder
             WVALID_S1 = 1'b1;
             WVALID_S0 = 1'b0;
         end else if (aw_buf.addr < 32'h0001_0000) begin
-            WVALID_S0 = 1'b0;
-            WVALID_S1 = 1'b1;
+            WVALID_S1 = 1'b0;
+            WVALID_S0 = 1'b1;
         end
     end
 end
@@ -343,6 +336,12 @@ always_ff @(posedge ACLK or negedge ARESETn) begin
     end
 end
 
+always_comb  begin
+    BVALID_M1 = 0;
+	if(abt_s == S1_BVALID || abt_s == S0_BVALID) begin
+		BVALID_M1 = 1;
+	end
+end
 
 
 struct packed {
@@ -427,8 +426,8 @@ always_comb begin : ar_decoder
             ARVALID_S1 = 1'b1;
             ARVALID_S0 = 1'b0;
         end else if (ar_buf.addr < 32'h0001_0000) begin
-            ARVALID_S0 = 1'b0;
-            ARVALID_S1 = 1'b1;
+            ARVALID_S1 = 1'b0;
+            ARVALID_S0 = 1'b1;
         end
     end
 end
@@ -707,7 +706,7 @@ always_comb begin
                 end
             end
             else if(m1_rhs) begin
-                if(RLAST_S1) begin
+                if(RLAST_S0) begin
                     abt_ns = M0_TOP;
                 end
                 else begin
